@@ -1,0 +1,34 @@
+# Build and install artifacts
+build/
+install/
+log/
+
+# ROS 2-specific files
+.colcon/
+
+# Python cache (in case of Python scripts)
+__pycache__/
+*.pyc
+
+# VSCode settings (optional, if you're using it)
+.vscode/
+
+# Mac/Linux file system junk
+.DS_Store
+
+# Temporary files
+*.swp
+*.bak
+*.tmp
+
+# CMake-generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Ignore images and data (optional, if large or not needed)
+*.png
+*.jpg
+images/
+

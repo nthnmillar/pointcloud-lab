@@ -35,6 +35,7 @@
         <origin xyz="0 0 0" rpy="${pi / 2.0} 0 0" />
         <material name="grey" />
       </visual>
+       <xacro:cylinder_inertia m="1.0" r="${wheel_radius}" l="${wheel_length}" o_xyz="0 0 0" o_rpy="${pi / 2.0} 0 0" />
     </link>
   </xacro:macro>
 
@@ -64,6 +65,7 @@
       <origin xyz="0 0 0" rpy="0 0 0" />
       <material name="grey" />
     </visual>
+    <xacro:sphere_inertia m="0.5" r="${wheel_radius / 2}" o_xyz="0 0 0" o_rpy="0 0 0" />
   </link>
 
   <joint name="base_caster_wheel_joint" type="fixed">

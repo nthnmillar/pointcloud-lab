@@ -1,6 +1,8 @@
 <launch>
   <let  name="urdf_path" 
         value="$(find-pkg-share robot_description)/urdf/robot.urdf.xacro" />
+  <let  name="gazebo_config_path" 
+        value="$(find-pkg-share robot_bringup)/config/gazebo_bridge.yaml" />
   <let  name="rviz_config_path" 
         value="$(find-pkg-share robot_description)/rviz/urdf_config.rviz" />
 
@@ -17,6 +19,11 @@
 
   <!-- Robot load -->
   <node pkg="ros_gz_sim" exec="create" output="screen" args="-topic robot_description" />
+
+  <!-- Ros GZ Bridge -->
+  <node pkg="ros_gz_bridge" exec="parameter_bridge">
+    <param name="config_file" value="$(var gazebo_config_path)" />
+  </node>
 
   <!-- Rviz config with GUI -->
   <node pkg="rviz2" exec="rviz2" output="screen" args="-d $(var rviz_config_path)" />

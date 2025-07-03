@@ -13,10 +13,10 @@
         value="$(command 'xacro $(var urdf_path)')" />
   </node>
 
-  <!-- Empty world playing-->
+  <!-- Empty world playing -->
   <include file="$(find-pkg-share ros_gz_sim)/launch/gz_sim.launch.py">
     <arg name="gz_args" value="$(find-pkg-share robot_bringup)/worlds/test_world.sdf -r" />
-     <!-- <arg name="gz_args" value="empty.sdf -r" /> -->
+    <!-- <arg name="gz_args" value="empty.sdf -r" /> -->
   </include>
 
   <!-- Robot load -->
@@ -26,6 +26,10 @@
   <node pkg="ros_gz_bridge" exec="parameter_bridge">
     <param name="config_file" value="$(var gazebo_config_path)" />
   </node>
+
+  <!-- Static transform publisher for LiDAR -->
+  <node pkg="tf2_ros" exec="static_transform_publisher" output="screen"
+        args="0 0 0 0 0 0 base_footprint_link robot/base_footprint_link/lidar" />
 
   <!-- Rviz config with GUI -->
   <node pkg="rviz2" exec="rviz2" output="screen" args="-d $(var rviz_config_path)" />

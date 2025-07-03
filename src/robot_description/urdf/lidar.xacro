@@ -31,6 +31,14 @@
     <origin xyz="0 0 0.3" rpy="0 0 0"/>
   </joint>
 
+  <link name="lidar_link_optical" />
+
+  <joint name="lidar_optical_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="lidar_link"/>
+    <child link="lidar_link_optical"/>
+  </joint>
+
   <gazebo reference="lidar_link">
     <sensor name="lidar" type="gpu_lidar">
       <pose>0 0 0 0 0 0</pose>

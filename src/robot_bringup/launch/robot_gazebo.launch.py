@@ -56,7 +56,7 @@ def generate_launch_description():
             package='tf2_ros',
             executable='static_transform_publisher',
             output='screen',
-            arguments=['0', '0', '0', '0', '0', '0', 'base_footprint_link', 'robot/base_footprint_link/lidar']
+            arguments=['.15', '0', '.5', '0', '0', '0', 'base_footprint_link', 'robot/base_footprint_link/lidar']
         ),
 
         # RViz

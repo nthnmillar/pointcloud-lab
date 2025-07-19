@@ -43,7 +43,8 @@
     <sensor name="lidar" type="gpu_lidar">
       <pose>0 0 0 0 0 0</pose>
       <update_rate>20</update_rate>
-      <lidar>
+      <gz_frame_id>lidar_link</gz_frame_id>
+      <ray>
         <scan>
           <horizontal>
             <samples>640</samples>
@@ -63,7 +64,7 @@
           <max>30.0</max>
           <resolution>0.01</resolution>
         </range>
-      </lidar>
+      </ray>
       <visualize>true</visualize>
     </sensor>
   </gazebo>

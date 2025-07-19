@@ -52,12 +52,12 @@ def generate_launch_description():
         ),
 
         # static transform publisher exactly like original XML
-        Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            output='screen',
-            arguments=['.15', '0', '.5', '0', '0', '0', 'base_footprint_link', 'robot/base_footprint_link/lidar']
-        ),
+        # Node(
+        #     package='tf2_ros',
+        #     executable='static_transform_publisher',
+        #     output='screen',
+        #     arguments=['.15', '0', '.5', '0', '0', '0', 'base_footprint_link', 'robot/base_footprint_link/lidar']
+        # ),
 
         # RViz
         Node(

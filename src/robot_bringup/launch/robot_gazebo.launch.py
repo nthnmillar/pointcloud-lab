@@ -13,6 +13,7 @@ def generate_launch_description():
     urdf_path = PathJoinSubstitution([robot_description_pkg, 'urdf', 'robot.urdf.xacro'])
     gazebo_config_path = PathJoinSubstitution([robot_bringup_pkg, 'config', 'gazebo_bridge.yaml'])
     rviz_config_path = PathJoinSubstitution([robot_description_pkg, 'rviz', 'urdf_config.rviz'])
+    imu_config_path = PathJoinSubstitution([robot_bringup_pkg, 'config', 'imu_config.yaml'])
     world_path = PathJoinSubstitution([robot_bringup_pkg, 'worlds', 'test_world.sdf'])
 
     return LaunchDescription([
@@ -51,14 +52,6 @@ def generate_launch_description():
             output='screen'
         ),
 
-        # static transform publisher exactly like original XML
-        # Node(
-        #     package='tf2_ros',
-        #     executable='static_transform_publisher',
-        #     output='screen',
-        #     arguments=['.15', '0', '.5', '0', '0', '0', 'base_footprint_link', 'robot/base_footprint_link/lidar']
-        # ),
-
         # RViz
         Node(
             package='rviz2',
@@ -66,4 +59,13 @@ def generate_launch_description():
             arguments=['-d', rviz_config_path],
             output='screen'
         ),
+
+        Node(
+            package='robot_localization',
+            executable='ekf_node',
+            name='ekf_filter_node',
+            output='screen',
+            parameters=[{'use_sim_time': True}],
+            arguments=['-d', imu_config_path],
+        )
     ])

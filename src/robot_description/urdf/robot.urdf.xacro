@@ -6,5 +6,7 @@
   <xacro:include filename="mobile_base_gazebo.xacro" />
   <xacro:include filename="camera.xacro" />
   <xacro:include filename="lidar.xacro" />
+  <xacro:include filename="IMU.xacro" />
+  <xacro:imu_sensor_macro parent_link="base_link"/>
   
 </robot>

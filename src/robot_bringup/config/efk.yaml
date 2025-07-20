@@ -21,7 +21,7 @@ ekf_node:
     odometry0_relative: false
 
     # IMU input
-    imu0: /imu/data
+    imu0: /imu
     imu0_config: [false, false, false,
                   true,  true,  true,
                   false, false, false,

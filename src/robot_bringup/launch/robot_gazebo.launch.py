@@ -13,7 +13,7 @@ def generate_launch_description():
     urdf_path = PathJoinSubstitution([robot_description_pkg, 'urdf', 'robot.urdf.xacro'])
     gazebo_config_path = PathJoinSubstitution([robot_bringup_pkg, 'config', 'gazebo_bridge.yaml'])
     rviz_config_path = PathJoinSubstitution([robot_description_pkg, 'rviz', 'urdf_config.rviz'])
-    imu_config_path = PathJoinSubstitution([robot_bringup_pkg, 'config', 'imu_config.yaml'])
+    ekf_config_path = PathJoinSubstitution([robot_bringup_pkg, 'config', 'ekf.yaml'])
     world_path = PathJoinSubstitution([robot_bringup_pkg, 'worlds', 'test_world.sdf'])
 
     return LaunchDescription([
@@ -65,7 +65,6 @@ def generate_launch_description():
             executable='ekf_node',
             name='ekf_filter_node',
             output='screen',
-            parameters=[{'use_sim_time': True}],
-            arguments=['-d', imu_config_path],
+            parameters=[ekf_config_path],
         )
     ])

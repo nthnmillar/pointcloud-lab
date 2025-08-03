@@ -61,17 +61,17 @@ ekf_filter_node:
 # has no pose information, so the first six values would be meaningless in that case. Each vector defaults to all false
 # if unspecified, effectively making this parameter required for each sensor.
         odom0_config: [true, true, false,    # Enable x,y positions
-                      false, false, true,     # Enable yaw
+                      false, false, false,    # DISABLE yaw from wheel odometry
                       true, true, false,      # Keep x,y velocities
-                      false, false, true,     # Keep yaw velocity
+                      false, false, false,    # DISABLE yaw velocity from wheel odometry
                       false, false, false]    # No acceleration
 
-        # Add IMU as a second input for better fusion
+        # Add IMU as a second input for better fusion - IMU handles ALL rotation
         imu0: imu/data
         imu0_config: [false, false, false,   # No position from IMU
-                      false, false, true,     # Use yaw from IMU
+                      true, true, true,       # Use roll, pitch, yaw from IMU
                       false, false, false,    # No velocity from IMU
-                      false, false, true,     # Use yaw velocity from IMU
+                      true, true, true,       # Use roll, pitch, yaw velocity from IMU
                       true, true, false]     # Use acceleration from IMU
 
         #        [x_pos   , y_pos    , z_pos,
@@ -80,20 +80,31 @@ ekf_filter_node:
         #         roll_vel, pitch_vel, yaw_vel,
         #         x_accel , y_accel  , z_accel]
 
+        # Enable IMU bias estimation for better long-term stability
+        use_control: false
+        control_timeout: 0.2
+        control_config: [false, false, false, false, false, false, true, true, false, false, false, false, false, false, false]
 
-        # Process noise parameters for better accuracy
-        process_noise_covariance: [0.05, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                                  0,    0.05,  0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+        # IMU bias estimation parameters
+        imu0_remove_gravitational_acceleration: true
+        imu0_relative: false
+        imu0_differential: false
+        imu0_queue_size: 10
+        imu0_nodelay: false
+
+        # Process noise parameters - optimized for sensor separation
+        process_noise_covariance: [0.01, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                  0,    0.01,  0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
                                   0,    0,    0.06,  0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                                  0,    0,    0,    0.03,  0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                                  0,    0,    0,    0,    0.03,  0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                                  0,    0,    0,    0,    0,    0.06,  0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0.01,  0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0.01,  0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0.005, 0,     0,     0,    0,    0,    0,    0,    0,    0,
                                   0,    0,    0,    0,    0,    0,    0.025,  0,     0,    0,    0,    0,    0,    0,    0,
                                   0,    0,    0,    0,    0,    0,    0,     0.025,  0,    0,    0,    0,    0,    0,    0,
                                   0,    0,    0,    0,    0,    0,    0,     0,     0.04,  0,    0,    0,    0,    0,    0,
-                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0.01,  0,    0,    0,    0,    0,
-                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.01,  0,    0,    0,    0,
-                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.02,  0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0.001, 0,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.001, 0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.001, 0,    0,    0,
                                   0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.01,  0,    0,
                                   0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.01,  0,
                                   0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.015]

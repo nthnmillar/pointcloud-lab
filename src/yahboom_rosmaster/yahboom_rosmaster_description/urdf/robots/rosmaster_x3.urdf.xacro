@@ -60,7 +60,7 @@
       parent="base_link"
       frame_id="imu"
       xyz_offset="0 0 0.006"
-      rpy_offset="0 0 0"
+      rpy_offset="0 0 ${M_PI}"
       update_rate="15.0"
       topic_name="imu/data"/>
 

@@ -9,7 +9,7 @@
     <plugin name='gz::sim::systems::UserCommands' filename='gz-sim-user-commands-system'/>
     <plugin name='gz::sim::systems::SceneBroadcaster' filename='gz-sim-scene-broadcaster-system'/>
     <plugin name='gz::sim::systems::Contact' filename='gz-sim-contact-system'/>
-    <plugin filename="gz-sim-imu-system"name="gz::sim::systems::Imu"/>
+    <plugin name='gz::sim::systems::Imu' filename='gz-sim-imu-system'/>
     <plugin name='gz::sim::systems::Sensors' filename='gz-sim-sensors-system'>
       <render_engine>ogre2</render_engine>
     </plugin>
@@ -101,7 +101,7 @@
         </inertial>
         <enable_wind>false</enable_wind>
       </link>
-      <pose>1.4817884268627484 6.2970109140952548 -1.9048325285376925e-07 -4.0726606677914195e-08 -1.8783314931072907e-08 4.6186859339632484e-12</pose>
+      <pose>1.4817884268627484 6.2970109140952548 -1.9026117068760538e-07 -4.072711518916606e-08 -1.876247875830157e-08 4.6186862773922486e-12</pose>
       <static>false</static>
       <self_collide>false</self_collide>
     </model>
@@ -121,7 +121,7 @@
       <pose>8.6008815765380859 1.4653626680374146 0 0 0 1.5708000357176291</pose>
     </include>
     <model name='box'>
-      <pose>2.3574834545041288 2.4643647237051445 0.5 0 0 0</pose>
+      <pose>2.3574834545041288 2.4643647237051445 0.49999999990199806 6.2287739151293738e-22 9.3279666454713669e-22 -3.6315533669320137e-22</pose>
       <link name='box_link'>
         <inertial>
           <inertia>
@@ -170,7 +170,245 @@
     <include>
       <uri>file:///home/nthnmillar/.gz/fuel/fuel.gazebosim.org/openrobotics/models/turtle/5</uri>
       <name>turtle</name>
-      <pose>0.93249122213612434 3.7796796588350077 0 0 0 0</pose>
+      <pose>0.93249127632057072 3.7796796588350077 0.065000000277287071 -2.5203334563497583e-18 3.7320974994766944e-07 1.1227633495256808e-16</pose>
+    </include>
+    <model name='box_0'>
+      <pose>-1.8122800588607788 1.5695199966430664 0.49999999990199806 -4.5281255690542617e-21 1.4557342594664594e-21 -0.48152974435677476</pose>
+      <link name='box_link'>
+        <inertial>
+          <inertia>
+            <ixx>0.16666</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.16666</iyy>
+            <iyz>0</iyz>
+            <izz>0.16666</izz>
+          </inertia>
+          <mass>1</mass>
+          <pose>0 0 0 0 0 0</pose>
+        </inertial>
+        <collision name='box_collision'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='box_visual'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.300000012 0.300000012 0.300000012 1</ambient>
+            <diffuse>0.699999988 0.699999988 0.699999988 1</diffuse>
+            <specular>1 1 1 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0 0 0 0</pose>
+        <enable_wind>false</enable_wind>
+      </link>
+      <static>false</static>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='box_1'>
+      <pose>1.6794099807739258 -1.3264700174331665 0.49999999990199806 2.954607945385473e-21 -2.56073868759787e-21 0.44651430974431483</pose>
+      <link name='box_link'>
+        <inertial>
+          <inertia>
+            <ixx>0.16666</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.16666</iyy>
+            <iyz>0</iyz>
+            <izz>0.16666</izz>
+          </inertia>
+          <mass>1</mass>
+          <pose>0 0 0 0 0 0</pose>
+        </inertial>
+        <collision name='box_collision'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='box_visual'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.300000012 0.300000012 0.300000012 1</ambient>
+            <diffuse>0.699999988 0.699999988 0.699999988 1</diffuse>
+            <specular>1 1 1 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0 0 0 0</pose>
+        <enable_wind>false</enable_wind>
+      </link>
+      <static>false</static>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='box_2'>
+      <pose>-2.2334198951721191 -1.6194700002670288 0.49999999990199806 -2.6670506513693895e-21 3.6430701400006629e-21 -0.55327972589685093</pose>
+      <link name='box_link'>
+        <inertial>
+          <inertia>
+            <ixx>0.16666</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.16666</iyy>
+            <iyz>0</iyz>
+            <izz>0.16666</izz>
+          </inertia>
+          <mass>1</mass>
+          <pose>0 0 0 0 0 0</pose>
+        </inertial>
+        <collision name='box_collision'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='box_visual'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.300000012 0.300000012 0.300000012 1</ambient>
+            <diffuse>0.699999988 0.699999988 0.699999988 1</diffuse>
+            <specular>1 1 1 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0 0 0 0</pose>
+        <enable_wind>false</enable_wind>
+      </link>
+      <static>false</static>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='box_3'>
+      <pose>4.0295827601540193 0.24537202246089418 0.49999999990199806 6.2287739151293738e-22 9.3279666454713669e-22 -3.6315533669320137e-22</pose>
+      <link name='box_link'>
+        <inertial>
+          <inertia>
+            <ixx>0.16666</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.16666</iyy>
+            <iyz>0</iyz>
+            <izz>0.16666</izz>
+          </inertia>
+          <mass>1</mass>
+          <pose>0 0 0 0 0 0</pose>
+        </inertial>
+        <collision name='box_collision'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='box_visual'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.300000012 0.300000012 0.300000012 1</ambient>
+            <diffuse>0.699999988 0.699999988 0.699999988 1</diffuse>
+            <specular>1 1 1 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0 0 0 0</pose>
+        <enable_wind>false</enable_wind>
+      </link>
+      <static>false</static>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='shelf_big_movai_1'>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>file:///home/nthnmillar/Projects/Course/urdf/shelf/meshes/shelf_big_movai.dae</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>file:///home/nthnmillar/Projects/Course/urdf/shelf/meshes/shelf_big_movai.dae</uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <pose>0 0 0 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>1</mass>
+          <inertia>
+            <ixx>1</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>1</iyy>
+            <iyz>0</iyz>
+            <izz>1</izz>
+          </inertia>
+        </inertial>
+        <enable_wind>false</enable_wind>
+      </link>
+      <pose>0.86066726590895182 -9.0265905396175228 0.026765213753657636 -0.020885197459340869 -0.00097903740150069498 0.013730294588350822</pose>
+      <static>false</static>
+      <self_collide>false</self_collide>
+    </model>
+    <include>
+      <uri>file:///home/nthnmillar/.gz/fuel/fuel.gazebosim.org/openrobotics/models/grey wall/3</uri>
+      <name>grey_wall_1</name>
+      <pose>8.7146874436971267 -4.8914562428295838 0 0 0 1.5707999672671704</pose>
+    </include>
+    <include>
+      <uri>file:///home/nthnmillar/.gz/fuel/fuel.gazebosim.org/openrobotics/models/grey wall/3</uri>
+      <name>grey_wall_2</name>
+      <pose>-8.2394027806308348 -5.3095790530645495 0 0 0 1.5707999672671704</pose>
+    </include>
+    <include>
+      <uri>file:///home/nthnmillar/.gz/fuel/fuel.gazebosim.org/openrobotics/models/grey wall/3</uri>
+      <name>grey_wall_3</name>
+      <pose>-8.1943697350475766 1.2855843891396717 0 0 0 1.5707999672671704</pose>
     </include>
     <light name='sun' type='directional'>
       <pose>0 0 10 0 0 0</pose>

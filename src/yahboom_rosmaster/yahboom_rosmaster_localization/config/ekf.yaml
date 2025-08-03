@@ -5,7 +5,7 @@ ekf_filter_node:
 # The frequency, in Hz, at which the filter will output a position estimate. Note that the filter will not begin
 # computation until it receives at least one message from one of the inputs. It will then run continuously at the
 # frequency specified here, regardless of whether it receives more measurements. Defaults to 30 if unspecified.
-        frequency: 15.0
+        frequency: 30.0
 
 # ekf_localization_node and ukf_localization_node both use a 3D omnidirectional motion model. If this parameter is
 # set to true, no 3D information will be used in your state estimate. Use this if you are operating in a planar
@@ -60,6 +60,14 @@ ekf_filter_node:
                       false, false, true,     # Keep yaw velocity
                       false, false, false]    # No acceleration
 
+        # Add IMU as a second input for better fusion
+        imu0: imu/data
+        imu0_config: [false, false, false,   # No position from IMU
+                      false, false, true,     # Use yaw from IMU
+                      false, false, false,    # No velocity from IMU
+                      false, false, true,     # Use yaw velocity from IMU
+                      true, true, false]     # Use acceleration from IMU
+
         #        [x_pos   , y_pos    , z_pos,
         #         roll    , pitch    , yaw,
         #         x_vel   , y_vel    , z_vel,
@@ -67,10 +75,20 @@ ekf_filter_node:
         #         x_accel , y_accel  , z_accel]
 
 
-        imu0: imu/data
-        imu0_config: [false, false, false,
-                      false, false, false,
-                      false, false, false,
-                      false, false, true,
-                      true, true, false]
+        # Process noise parameters for better accuracy
+        process_noise_covariance: [0.05, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                  0,    0.05,  0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0.06,  0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0.03,  0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0.03,  0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0.06,  0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0.025,  0,     0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,     0.025,  0,    0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,     0,     0.04,  0,    0,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0.01,  0,    0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.01,  0,    0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.02,  0,    0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.01,  0,    0,
+                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.01,  0,
+                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.015]
 

@@ -10,8 +10,9 @@ This launch file sets up a complete ROS 2 navigation environment.
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
@@ -259,12 +260,12 @@ def generate_launch_description():
     #     }.items()
     # )
 
-    start_assisted_teleop_cmd = Node(
-        package='yahboom_rosmaster_navigation',
-        executable='assisted_teleoperation.py',
-        output='screen',
-        parameters=[{'use_sim_time': use_sim_time}]
-    )
+    # start_assisted_teleop_cmd = Node(
+    #     package='yahboom_rosmaster_navigation',
+    #     executable='assisted_teleoperation.py',
+    #     output='screen',
+    #     parameters=[{'use_sim_time': use_sim_time}]
+    # )
 
     # Start the node that relays /cmd_vel to /mecanum_drive_controller/cmd_vel
     start_cmd_vel_relay_cmd = Node(
@@ -296,7 +297,7 @@ def generate_launch_description():
             'rviz_config_file': rviz_config_file,
             'use_rviz': use_rviz,
             'use_gazebo': use_gazebo,
-            'use_robot_state_pub': use_robot_state_pub,
+            'use_robot_state_pub': 'true',  # Force enable robot state publisher
             'use_sim_time': use_sim_time,
             'world_file': world_file,
             'x': x,
@@ -309,12 +310,43 @@ def generate_launch_description():
     )
 
     # Start the node that receives goal poses and sends the robot there
-    start_nav_to_pose_cmd = Node(
-        package='yahboom_rosmaster_navigation',
-        executable='nav_to_pose.py',
-        output='screen',
-        parameters=[{'use_sim_time': use_sim_time}]
+    # start_nav_to_pose_cmd = Node(
+    #     package='yahboom_rosmaster_navigation',
+    #     executable='nav_to_pose.py',
+    #     output='screen',
+    #     parameters=[{'use_sim_time': use_sim_time}]
+    # )
+
+    # Static transform publisher for initial odom to base_footprint transform
+    # This provides the initial odom transform until the EKF takes over
+    start_odom_transform_cmd = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='odom_transform_publisher',
+        output='log',
+        arguments=['0', '0', '0', '0', '0', '0', 'odom', 'base_footprint']
     )
+
+    # Static transform publisher for initial map to odom transform
+    # This provides the initial map transform until SLAM takes over
+    start_map_transform_cmd = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='map_transform_publisher',
+        output='log',
+        arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom']
+    )
+
+    # Static transform publisher for initial map to base_footprint transform
+    # This is needed to provide an initial transform when SLAM is disabled
+    # start_static_transform_cmd = Node(
+    #     package='tf2_ros',
+    #     executable='static_transform_publisher',
+    #     name='static_transform_publisher',
+    #     output='screen',
+    #     arguments=['0', '0', '0', '0', '0', '0', 'map', 'base_footprint'],
+    #     condition=IfCondition(PythonExpression(['not ', slam]))
+    # )
 
     # Launch the ROS 2 Navigation Stack
     start_ros2_navigation_cmd = IncludeLaunchDescription(
@@ -338,20 +370,20 @@ def generate_launch_description():
 
     # Add all launch arguments
     # Config and launch files
-    # ld.add_action(declare_autostart_cmd)
-    # ld.add_action(declare_camera_namespace_cmd)
+    ld.add_action(declare_autostart_cmd)
+    ld.add_action(declare_camera_namespace_cmd)
     ld.add_action(declare_enable_odom_tf_cmd)
     ld.add_action(declare_ekf_config_file_cmd)
     ld.add_action(declare_ekf_launch_file_cmd)
     ld.add_action(declare_gazebo_launch_file_cmd)
-    # ld.add_action(declare_map_yaml_cmd)
-    # ld.add_action(declare_namespace_cmd)
-    # ld.add_action(declare_nav2_params_file_cmd)
+    ld.add_action(declare_map_yaml_cmd)
+    ld.add_action(declare_namespace_cmd)
+    ld.add_action(declare_nav2_params_file_cmd)
     ld.add_action(declare_rviz_config_file_cmd)
-    # ld.add_action(declare_slam_cmd)
-    # ld.add_action(declare_use_composition_cmd)
-    # ld.add_action(declare_use_namespace_cmd)
-    # ld.add_action(declare_use_respawn_cmd)
+    ld.add_action(declare_slam_cmd)
+    ld.add_action(declare_use_composition_cmd)
+    ld.add_action(declare_use_namespace_cmd)
+    ld.add_action(declare_use_respawn_cmd)
 
     # Robot configuration
     ld.add_action(declare_robot_name_cmd)
@@ -373,16 +405,19 @@ def generate_launch_description():
     ld.add_action(declare_load_controllers_cmd)
     ld.add_action(declare_use_gazebo_cmd)
     ld.add_action(declare_use_robot_state_pub_cmd)
-    ld.add_action(declare_use_rviz_cmd)
+ 
     ld.add_action(declare_use_sim_time_cmd)
 
     # Add any actions
     # ld.add_action(start_apriltag_dock_cmd)
     # ld.add_action(start_assisted_teleop_cmd)
-    # ld.add_action(start_cmd_vel_relay_cmd)
+    ld.add_action(start_cmd_vel_relay_cmd)
     ld.add_action(start_ekf_cmd)
     ld.add_action(start_gazebo_cmd)
+    ld.add_action(start_odom_transform_cmd)
+    ld.add_action(start_map_transform_cmd)
+    # ld.add_action(start_static_transform_cmd)
     # ld.add_action(start_nav_to_pose_cmd)
-    # ld.add_action(start_ros2_navigation_cmd)
+    ld.add_action(start_ros2_navigation_cmd)
 
     return ld

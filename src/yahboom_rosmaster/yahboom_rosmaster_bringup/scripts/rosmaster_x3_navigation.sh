@@ -25,7 +25,6 @@ fi
 
 echo "Launching Gazebo simulation with Nav2..."
 ros2 launch yahboom_rosmaster_bringup rosmaster_x3_navigation.launch.py \
-    enable_odom_tf:=false \
     headless:=False \
     load_controllers:=true \
     world_file:=test_world.sdf \

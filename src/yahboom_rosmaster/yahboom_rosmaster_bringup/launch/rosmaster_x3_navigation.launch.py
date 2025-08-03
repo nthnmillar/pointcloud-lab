@@ -329,13 +329,13 @@ def generate_launch_description():
 
     # Static transform publisher for initial map to odom transform
     # This provides the initial map transform until SLAM takes over
-    start_map_transform_cmd = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='map_transform_publisher',
-        output='log',
-        arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom']
-    )
+    # start_map_transform_cmd = Node(
+    #     package='tf2_ros',
+    #     executable='static_transform_publisher',
+    #     name='map_transform_publisher',
+    #     output='log',
+    #     arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom']
+    # )
 
     # Static transform publisher for initial map to base_footprint transform
     # This is needed to provide an initial transform when SLAM is disabled
@@ -415,7 +415,7 @@ def generate_launch_description():
     ld.add_action(start_ekf_cmd)
     ld.add_action(start_gazebo_cmd)
     ld.add_action(start_odom_transform_cmd)
-    ld.add_action(start_map_transform_cmd)
+    # ld.add_action(start_map_transform_cmd)
     # ld.add_action(start_static_transform_cmd)
     # ld.add_action(start_nav_to_pose_cmd)
     ld.add_action(start_ros2_navigation_cmd)

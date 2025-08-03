@@ -329,6 +329,7 @@ def generate_launch_description():
 
     # Static transform publisher for initial map to odom transform
     # This provides the initial map transform until SLAM takes over
+    # DISABLED: SLAM should not publish map->odom during mapping
     # start_map_transform_cmd = Node(
     #     package='tf2_ros',
     #     executable='static_transform_publisher',

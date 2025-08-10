@@ -59,12 +59,12 @@
     <xacro:lidar3D_sensor
       prefix="$(arg prefix)"
       parent="base_link"
-      frame_id="lidar3d_frame"
-      xyz_offset="0 0 0.0825"
+      frame_id="lidar3D_frame"
+      xyz_offset="0.01 0 0.0825"
       rpy_offset="0 0 0"
       mesh_xyz_offset="0 0 0"
       mesh_rpy_offset="${-M_PI/2} 0 0"
-      topic_name="lidar/points/points"/>
+      topic_name="lidar/points"/>
 
     <xacro:imu_sensor
       prefix="$(arg prefix)"

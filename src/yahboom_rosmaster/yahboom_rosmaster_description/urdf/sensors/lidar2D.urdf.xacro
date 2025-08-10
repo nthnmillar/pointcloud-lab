@@ -89,6 +89,7 @@
       <!-- 2D LIDAR -->
       <sensor name="${prefix}lidar2D_sensor" type="gpu_lidar">
         <topic>${topic_name}</topic>
+        <pose>0 0 0 0 0 0</pose>
         <update_rate>${update_rate}</update_rate>
         <always_on>${always_on}</always_on>
         <visualize>${visualize}</visualize>

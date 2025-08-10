@@ -10,7 +10,8 @@
     <xacro:include filename="$(find yahboom_rosmaster_description)/urdf/mech/rosmaster_x3_base.urdf.xacro"/>
     <xacro:include filename="$(find yahboom_rosmaster_description)/urdf/mech/mecanum_wheel.urdf.xacro"/>
     <xacro:include filename="$(find yahboom_rosmaster_description)/urdf/sensors/rgbd_camera.urdf.xacro"/>
-    <xacro:include filename="$(find yahboom_rosmaster_description)/urdf/sensors/lidar.urdf.xacro"/>
+    <xacro:include filename="$(find yahboom_rosmaster_description)/urdf/sensors/lidar2D.urdf.xacro"/>
+    <xacro:include filename="$(find yahboom_rosmaster_description)/urdf/sensors/lidar3D.urdf.xacro"/>
     <xacro:include filename="$(find yahboom_rosmaster_description)/urdf/sensors/imu.urdf.xacro"/>
 
     <xacro:rosmaster_x3_base prefix="$(arg prefix)"/>
@@ -45,7 +46,7 @@
       xyz_offset="0.105 0 0.05"
       rpy_offset="0 -0.50 0"/>
 
-    <xacro:lidar_sensor
+    <xacro:lidar2D_sensor
       prefix="$(arg prefix)"
       parent="base_link"
       frame_id="laser_frame"
@@ -54,6 +55,16 @@
       mesh_xyz_offset="0 0 0"
       mesh_rpy_offset="${-M_PI/2} 0 0"
       topic_name="scan"/>
+    
+    <xacro:lidar3D_sensor
+      prefix="$(arg prefix)"
+      parent="base_link"
+      frame_id="lidar3d_frame"
+      xyz_offset="0 0 0.0825"
+      rpy_offset="0 0 0"
+      mesh_xyz_offset="0 0 0"
+      mesh_rpy_offset="${-M_PI/2} 0 0"
+      topic_name="lidar/points/points"/>
 
     <xacro:imu_sensor
       prefix="$(arg prefix)"

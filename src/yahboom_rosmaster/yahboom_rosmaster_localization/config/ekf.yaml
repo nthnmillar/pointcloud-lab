@@ -40,11 +40,6 @@ ekf_filter_node:
     odom_frame: odom                 # Defaults to "odom" if unspecified
     base_link_frame: base_footprint  # Defaults to "base_link" if unspecified
     world_frame: odom                # Defaults to the value of odom_frame if unspecified
-    # Don't publish map->odom transform, only odom->base_footprint
-    publish_tf: true
-    tf_publish_period: 0.02
-    # Ensure EKF only publishes odom->base_footprint, not map->odom
-    publish_tf_period: 0.02
 
     # The filter accepts an arbitrary number of inputs from each input message type (nav_msgs/Odometry,
     # geometry_msgs/PoseWithCovarianceStamped, geometry_msgs/TwistWithCovarianceStamped,

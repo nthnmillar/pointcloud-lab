@@ -162,10 +162,6 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        back_left_wheel_link:
-          Value: true
-        back_right_wheel_link:
-          Value: true
         base_footprint:
           Value: true
         base_link:
@@ -188,10 +184,6 @@ Visualization Manager:
           Value: true
         cam_1_link:
           Value: true
-        front_left_wheel_link:
-          Value: true
-        front_right_wheel_link:
-          Value: true
         imu_link:
           Value: true
         laser_frame:
@@ -212,10 +204,6 @@ Visualization Manager:
           odom:
             base_footprint:
               base_link:
-                back_left_wheel_link:
-                  {}
-                back_right_wheel_link:
-                  {}
                 cam_1_link:
                   cam_1_color_frame:
                     cam_1_color_optical_frame:
@@ -229,10 +217,6 @@ Visualization Manager:
                   cam_1_infra2_frame:
                     cam_1_infra2_optical_frame:
                       {}
-                front_left_wheel_link:
-                  {}
-                front_right_wheel_link:
-                  {}
                 imu_link:
                   {}
                 laser_frame:
@@ -650,14 +634,14 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
+        Max Value: 2.988417625427246
+        Min Value: -0.05993083864450455
         Value: true
       Axis: Z
       Channel Name: intensity
       Class: rviz_default_plugins/PointCloud2
       Color: 255; 255; 255
-      Color Transformer: Intensity
+      Color Transformer: AxisColor
       Decay Time: 10
       Enabled: true
       Invert Rainbow: false
@@ -669,7 +653,7 @@ Visualization Manager:
       Position Transformer: XYZ
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.009999999776482582
+      Size (m): 0.05000000074505806
       Style: Spheres
       Topic:
         Depth: 5
@@ -726,11 +710,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9503169655799866
+      Pitch: 0.9553171992301941
       Position:
-        X: 1.5094799995422363
-        Y: 1.5094798803329468
-        Z: 3.018951654434204
+        X: 1.5707191228866577
+        Y: 1.5707184076309204
+        Z: 3.1414244174957275
       Target Frame: <Fixed Frame>
       Value: FPS (rviz_default_plugins)
       Yaw: 3.9269909858703613
@@ -757,5 +741,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1160
-  X: 341
-  Y: 47
+  X: 526
+  Y: 62

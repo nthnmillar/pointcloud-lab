@@ -326,6 +326,8 @@ def generate_launch_description():
         output='log',
         arguments=['0', '0', '0', '0', '0', '0', 'odom', 'base_footprint']
     )
+    
+
 
     # Static transform publisher for initial map to odom transform
     # This provides the initial map transform until SLAM takes over

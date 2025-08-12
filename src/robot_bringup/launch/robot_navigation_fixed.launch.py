@@ -89,6 +89,8 @@ def generate_launch_description():
         parameters=[{'use_sim_time': use_sim_time}]
     )
     
+
+    
     # Create the launch description
     ld = LaunchDescription()
     
@@ -101,6 +103,7 @@ def generate_launch_description():
     ld.add_action(start_gazebo_cmd)
     ld.add_action(start_ekf_cmd)
     ld.add_action(static_odom_cmd)
+    ld.add_action(initial_pose_cmd)
     ld.add_action(start_nav2_cmd)
     ld.add_action(start_slam_cmd)
     

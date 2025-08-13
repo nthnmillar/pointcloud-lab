@@ -39,7 +39,7 @@ ekf_filter_node:
     map_frame: map                   # Defaults to "map" if unspecified
     odom_frame: odom                 # Defaults to "odom" if unspecified
     base_link_frame: base_footprint  # Defaults to "base_link" if unspecified
-    world_frame: map                 # Use map frame for proper Nav2 integration
+    world_frame: odom                # Use odom frame to maintain position during movement
 
     # The filter accepts an arbitrary number of inputs from each input message type (nav_msgs/Odometry,
     # geometry_msgs/PoseWithCovarianceStamped, geometry_msgs/TwistWithCovarianceStamped,
@@ -68,6 +68,21 @@ ekf_filter_node:
                   false, false, false,    # No velocity from IMU
                   true, true, true,       # Use roll, pitch, yaw velocity from IMU
                   true, true, false]     # Use acceleration from IMU
+    
+    # Add global pose input from Nav2 (AMCL) for map-based corrections
+    # This allows the EKF to receive global pose updates while maintaining odom-based tracking
+    pose0: /amcl_pose
+    pose0_config: [true, true, false,   # Use x,y position from AMCL
+                   false, false, true,   # Use yaw from AMCL
+                   false, false, false,  # No velocity from pose
+                   false, false, false,  # No angular velocity from pose
+                   false, false, false]  # No acceleration from pose
+    
+    # Pose input parameters to reduce smearing after corrections
+    pose0_queue_size: 5
+    pose0_nodelay: false
+    pose0_differential: false
+    pose0_relative: false
 
     #        [x_pos   , y_pos    , z_pos,
     #         roll    , pitch    , yaw,
@@ -87,17 +102,27 @@ ekf_filter_node:
     imu0_queue_size: 10
     imu0_nodelay: false
     
-    # Initial estimate covariance - allows filter to start with high uncertainty
-    # This helps reduce initial pose error and allows faster convergence
-    initial_estimate_covariance: [0.5, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                                 0,    0.5,  0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                                 0,    0,    0.5,  0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                                 0,    0,    0,    0.1,  0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                                 0,    0,    0,    0,    0.1,  0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                                 0,    0,    0,    0,    0,    0.1,  0,     0,     0,    0,    0,    0,    0,    0,    0,
-                                 0,    0,    0,    0,    0,    0,    0.1,   0,     0,    0,    0,    0,    0,    0,    0,
-                                 0,    0,    0,    0,    0,    0,    0,     0.1,   0,    0,    0,    0,    0,    0,    0,
-                                 0,    0,    0,    0,    0,    0,    0,     0,     0.1,  0,    0,    0,    0,    0,    0,
+    # EKF fusion parameters to reduce smearing
+    # Increase frequency for more responsive corrections
+    frequency: 50.0
+    
+    # Reduce transform tolerance to prevent excessive corrections
+    transform_tolerance: 0.1
+    
+    # Enable prediction timeout to prevent stale predictions
+    prediction_timeout: 0.1
+    
+    # Initial estimate covariance - balanced for stable tracking
+    # Moderate uncertainty to allow both odom tracking and global corrections
+    initial_estimate_covariance: [0.2, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                 0,    0.2,  0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                 0,    0,    0.2,  0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                 0,    0,    0,    0.05, 0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                 0,    0,    0,    0,    0.05, 0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                 0,    0,    0,    0,    0,    0.05, 0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0.05,  0,     0,    0,    0,    0,    0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,     0.05,  0,    0,    0,    0,    0,    0,    0,
+                                 0,    0,    0,    0,    0,    0,    0,     0,     0.05, 0,    0,    0,    0,    0,    0,
                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0.01, 0,    0,    0,    0,    0,
                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.01, 0,    0,    0,    0,
                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.01, 0,    0,    0,
@@ -105,21 +130,21 @@ ekf_filter_node:
                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.01, 0,
                                  0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.01]
 
-    # Process noise parameters - optimized for better initial pose estimation
-    # Lower values for position and orientation to reduce initial pose error
-    process_noise_covariance: [0.02, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                              0,    0.02,  0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+    # Process noise parameters - optimized to reduce lidar smearing after pose corrections
+    # Lower values for position and orientation to prevent excessive drift after corrections
+    process_noise_covariance: [0.015, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0.015,  0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
                               0,    0,    0.06,  0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                              0,    0,    0,    0.003, 0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                              0,    0,    0,    0,    0.003, 0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                              0,    0,    0,    0,    0,    0.0005, 0,     0,     0,    0,    0,    0,    0,    0,    0,
-                              0,    0,    0,    0,    0,    0,    0.025,  0,     0,    0,    0,    0,    0,    0,    0,
-                              0,    0,    0,    0,    0,    0,    0,     0.025,  0,    0,    0,    0,    0,    0,    0,
-                              0,    0,    0,    0,    0,    0,    0,     0,     0.04,  0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0.005, 0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0.005, 0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0.001, 0,     0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0.02,   0,     0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0.02,   0,    0,    0,    0,    0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0.03,  0,    0,    0,    0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,     0,     0,    0.0005, 0,    0,    0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.0005, 0,    0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.0005, 0,    0,    0,
-                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.01,  0,    0,
-                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.01,  0,
-                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.015]
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.008, 0,    0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.008, 0,
+                              0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.012]
 

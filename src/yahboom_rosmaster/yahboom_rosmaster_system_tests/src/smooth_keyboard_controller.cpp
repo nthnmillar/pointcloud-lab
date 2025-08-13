@@ -7,6 +7,8 @@
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <set>
+#include <map>
 
 using namespace std::chrono_literals;
 
@@ -21,11 +23,11 @@ public:
         // Create publisher for status messages
         status_pub_ = this->create_publisher<std_msgs::msg::String>("/controller_status", 10);
         
-        // Movement parameters for smooth control
-        max_linear_velocity_ = 0.5;    // m/s
-        max_angular_velocity_ = 1.0;   // rad/s
-        acceleration_rate_ = 0.1;      // m/s² per update
-        deceleration_rate_ = 0.15;     // m/s² per update
+        // Movement parameters for responsive control
+        max_linear_velocity_ = 3;    // Maximum forward/backward/strafe speed -m/s
+        max_angular_velocity_ = 5;   // Maximum rotation speed - rad/s
+        acceleration_rate_ = 1.5;    // Fast acceleration (responsive but not too slow)
+        deceleration_rate_ = 2.0;    // Fast deceleration (quick stopping)
         
         // Current velocity state
         current_linear_x_ = 0.0;
@@ -38,7 +40,7 @@ public:
         target_angular_z_ = 0.0;
         
         // Control loop parameters
-        control_rate_ = 20.0;  // Hz
+        control_rate_ = 50.0;  // Hz (higher rate for more responsive control)
         control_timer_ = this->create_wall_timer(
             1000ms / static_cast<int>(control_rate_), 
             std::bind(&SmoothKeyboardController::control_loop, this)
@@ -48,8 +50,8 @@ public:
         keyboard_thread_ = std::thread(&SmoothKeyboardController::keyboard_input_loop, this);
         
         RCLCPP_INFO(this->get_logger(), "Smooth Keyboard Controller Started!");
-        RCLCPP_INFO(this->get_logger(), "Controls: WASD (movement), QE (rotation), X (stop), SPACE (emergency)");
-        RCLCPP_INFO(this->get_logger(), "Press Ctrl+C to exit");
+        RCLCPP_INFO(this->get_logger(), "Controls: Press and hold WASD (movement), QE (rotation) - Release to stop");
+        RCLCPP_INFO(this->get_logger(), "SPACE = Emergency stop, Ctrl+C to exit");
     }
     
     ~SmoothKeyboardController()
@@ -82,6 +84,14 @@ public:
         RCLCPP_WARN(this->get_logger(), "EMERGENCY STOP ACTIVATED!");
     }
     
+    void gradual_stop()
+    {
+        // Gradually stop by setting target velocities to zero
+        target_linear_x_ = 0.0;
+        target_linear_y_ = 0.0;
+        target_angular_z_ = 0.0;
+    }
+    
 private:
     void keyboard_input_loop()
     {
@@ -98,11 +108,56 @@ private:
         int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
         fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
         
+        // Track currently pressed keys and their timestamps
+        std::map<char, std::chrono::steady_clock::time_point> key_press_times;
+        std::set<char> active_movement_keys;
+        
         while (rclcpp::ok()) {
             char ch;
             if (read(STDIN_FILENO, &ch, 1) > 0) {
-                process_key(ch);
+                if (ch == 3) {  // Ctrl+C
+                    rclcpp::shutdown();
+                    break;
+                }
+                
+                char key = std::tolower(ch);
+                if (key == ' ' || key == 'w' || key == 's' || key == 'a' || key == 'd' || key == 'q' || key == 'e') {
+                    if (key == ' ') {
+                        emergency_stop();
+                    } else {
+                        // Record key press time and add to active keys
+                        key_press_times[key] = std::chrono::steady_clock::now();
+                        active_movement_keys.insert(key);
+                        process_key(key);
+                    }
+                }
             }
+            
+            // Check for key releases by monitoring active keys
+            auto now = std::chrono::steady_clock::now();
+            std::set<char> keys_to_remove;
+            
+            for (char key : active_movement_keys) {
+                auto press_time = key_press_times[key];
+                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - press_time);
+                
+                // If a key hasn't been "refreshed" recently, consider it released
+                if (duration.count() > 20) {  // 20ms timeout (more responsive)
+                    keys_to_remove.insert(key);
+                }
+            }
+            
+            // Remove released keys
+            for (char key : keys_to_remove) {
+                active_movement_keys.erase(key);
+                key_press_times.erase(key);
+            }
+            
+            // If no movement keys are active, stop the robot
+            if (active_movement_keys.empty()) {
+                gradual_stop();
+            }
+            
             std::this_thread::sleep_for(10ms);
         }
         
@@ -130,9 +185,6 @@ private:
                 break;
             case 'e':  // Rotate right
                 execute_movement("ROTATE_RIGHT");
-                break;
-            case 'x':  // Stop
-                execute_movement("STOP");
                 break;
             case ' ':  // Spacebar - emergency stop
                 emergency_stop();

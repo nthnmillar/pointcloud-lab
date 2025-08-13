@@ -17,15 +17,30 @@ add_executable(square_mecanum_controller
   src/square_mecanum_controller.cpp
 )
 
-# Specify dependencies for the target
+# Add the smooth keyboard controller executable
+add_executable(smooth_keyboard_controller
+  src/smooth_keyboard_controller.cpp
+)
+
+# Specify dependencies for the targets
 ament_target_dependencies(square_mecanum_controller
   rclcpp
   geometry_msgs
   std_msgs
 )
 
+ament_target_dependencies(smooth_keyboard_controller
+  rclcpp
+  geometry_msgs
+  std_msgs
+)
+
+# Python nodes don't need ament_target_dependencies
+# They use the package dependencies from package.xml
+
 install(TARGETS
   square_mecanum_controller
+  smooth_keyboard_controller
   DESTINATION lib/${PROJECT_NAME}
 )
 

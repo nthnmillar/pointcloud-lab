@@ -32,33 +32,44 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-ros-gz \
     ros-jazzy-rqt-robot-steering \
     ros-jazzy-rviz-imu-plugin \
+    ros-jazzy-slam-toolbox \
     && rm -rf /var/lib/apt/lists/*
 
-# Set up workspace directory
-WORKDIR /ros2_ws
+# Create a non-root user for safety (use next available UID)
+RUN useradd -m -s /bin/bash rosuser && \
+    usermod -aG sudo rosuser
+
+# Set up workspace directory with proper ownership
+WORKDIR /home/rosuser/ros2_ws
+RUN chown -R rosuser:rosuser /home/rosuser
+
+# Switch to non-root user
+USER rosuser
 
 # Copy source code and configuration files
-COPY . /ros2_ws/
+COPY --chown=rosuser:rosuser . /home/rosuser/ros2_ws/
 
 # Build the workspace during image build
 RUN bash -c "source /opt/ros/jazzy/setup.bash && \
-    cd /ros2_ws && \
+    cd /home/rosuser/ros2_ws && \
     rosdep install --from-paths src --ignore-src -r -y --skip-keys 'ros-jazzy-gz-ros2-control-demos' || true && \
     colcon build --symlink-install"
 
 # Create a script to run the workspace
 RUN echo '#!/bin/bash\n\
 source /opt/ros/jazzy/setup.bash\n\
-source /ros2_ws/install/setup.bash\n\
-exec "$@"' > /usr/local/bin/run.sh && \
-    chmod +x /usr/local/bin/run.sh
+source /home/rosuser/ros2_ws/install/setup.bash\n\
+exec "$@"' > /home/rosuser/run.sh && \
+    chmod +x /home/rosuser/run.sh && \
+    chown rosuser:rosuser /home/rosuser/run.sh
 
 # Source ROS2 in bashrc
-RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+RUN echo "source /opt/ros/jazzy/setup.bash" >> /home/rosuser/.bashrc
 
 # Expose ROS2 ports
 EXPOSE 11311 11312
 
-# Default command
-CMD ["/usr/local/bin/run.sh", "bash"]
+# Override the base image's entrypoint
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["source /opt/ros/jazzy/setup.bash && bash"]
 

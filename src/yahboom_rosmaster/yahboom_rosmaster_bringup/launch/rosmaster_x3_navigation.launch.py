@@ -160,7 +160,7 @@ def generate_launch_description():
 
     declare_slam_cmd = DeclareLaunchArgument(
         name='slam',
-        default_value='False',
+        default_value='True',
         description='Whether to run SLAM')
 
     declare_use_namespace_cmd = DeclareLaunchArgument(

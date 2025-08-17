@@ -70,58 +70,8 @@
       <pose>0 0 0 0 0 0</pose>
       <self_collide>false</self_collide>
     </model>
-    <model name='shelf_big_movai'>
-      <link name='link'>
-        <visual name='visual'>
-          <geometry>
-            <mesh>
-              <uri>file:///home/nthnmillar/Projects/Course/urdf/shelf/meshes/shelf_big_movai.dae</uri>
-            </mesh>
-          </geometry>
-        </visual>
-        <collision name='collision'>
-          <geometry>
-            <mesh>
-              <uri>file:///home/nthnmillar/Projects/Course/urdf/shelf/meshes/shelf_big_movai.dae</uri>
-            </mesh>
-          </geometry>
-        </collision>
-        <pose>0 0 0 0 0 0</pose>
-        <inertial>
-          <pose>0 0 0 0 0 0</pose>
-          <mass>1</mass>
-          <inertia>
-            <ixx>1</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>1</iyy>
-            <iyz>0</iyz>
-            <izz>1</izz>
-          </inertia>
-        </inertial>
-        <enable_wind>false</enable_wind>
-      </link>
-      <pose>1.4817884268627484 6.2970109140952548 -1.9026117068760538e-07 -4.072711518916606e-08 -1.876247875830157e-08 4.6186862773922486e-12</pose>
-      <static>false</static>
-      <self_collide>false</self_collide>
-    </model>
-    <include>
-      <uri>file:///home/nthnmillar/.gz/fuel/fuel.gazebosim.org/openrobotics/models/office desk/1</uri>
-      <name>Desk</name>
-      <pose>0.012990400195121765 -3.1175000667572021 0 0 0 1.5707963267948963</pose>
-    </include>
-    <include>
-      <uri>file:///home/nthnmillar/.gz/fuel/fuel.gazebosim.org/openrobotics/models/office chair/1</uri>
-      <name>OfficeChair</name>
-      <pose>-0.46968683280712442 -4.1154967875304518 0 0 0 0</pose>
-    </include>
-    <include>
-      <uri>file:///home/nthnmillar/.gz/fuel/fuel.gazebosim.org/openrobotics/models/grey wall/3</uri>
-      <name>grey_wall</name>
-      <pose>8.6008815765380859 1.4653626680374146 0 0 0 1.5708000357176291</pose>
-    </include>
     <model name='box'>
-      <pose>2.3574834545041288 2.4643647237051445 0.49999999990199806 6.2287739151293738e-22 9.3279666454713669e-22 -3.6315533669320137e-22</pose>
+      <pose>2.3574834545041288 2.4643647237051445 0.49999999980497606 1.0048033485058014e-21 -2.4640853465547739e-21 -3.9210766489770922e-22</pose>
       <link name='box_link'>
         <inertial>
           <inertia>
@@ -167,13 +117,8 @@
       <static>false</static>
       <self_collide>false</self_collide>
     </model>
-    <include>
-      <uri>file:///home/nthnmillar/.gz/fuel/fuel.gazebosim.org/openrobotics/models/turtle/5</uri>
-      <name>turtle</name>
-      <pose>0.93249127632057072 3.7796796588350077 0.065000000277287071 -2.5203334563497583e-18 3.7320974994766944e-07 1.1227633495256808e-16</pose>
-    </include>
     <model name='box_0'>
-      <pose>-1.8122800588607788 1.5695199966430664 0.49999999990199806 -4.5281255690542617e-21 1.4557342594664594e-21 -0.48152974435677476</pose>
+      <pose>-1.8122800588607788 1.5695199966430664 0.49999999980497606 -5.6633659058826257e-21 3.3698233843043827e-21 -0.48152974435677465</pose>
       <link name='box_link'>
         <inertial>
           <inertia>
@@ -220,7 +165,7 @@
       <self_collide>false</self_collide>
     </model>
     <model name='box_1'>
-      <pose>1.6794099807739258 -1.3264700174331665 0.49999999990199806 2.954607945385473e-21 -2.56073868759787e-21 0.44651430974431483</pose>
+      <pose>1.6794099807739258 -1.3264700174331665 0.49999999980497606 -1.7390904041644465e-21 -1.469391796021745e-21 0.44651430974431489</pose>
       <link name='box_link'>
         <inertial>
           <inertia>
@@ -267,7 +212,7 @@
       <self_collide>false</self_collide>
     </model>
     <model name='box_2'>
-      <pose>-2.2334198951721191 -1.6194700002670288 0.49999999990199806 -2.6670506513693895e-21 3.6430701400006629e-21 -0.55327972589685093</pose>
+      <pose>-2.2334198951721191 -1.6194700002670288 0.49999999980497606 -2.0865999152418755e-21 2.8052020264444084e-21 -0.55327972589685104</pose>
       <link name='box_link'>
         <inertial>
           <inertia>
@@ -314,7 +259,7 @@
       <self_collide>false</self_collide>
     </model>
     <model name='box_3'>
-      <pose>4.0295827601540193 0.24537202246089418 0.49999999990199806 6.2287739151293738e-22 9.3279666454713669e-22 -3.6315533669320137e-22</pose>
+      <pose>4.0295827601540193 0.24537202246089418 0.49999999980497606 1.0048033485058014e-21 -2.4640853465547739e-21 -3.9210766489770922e-22</pose>
       <link name='box_link'>
         <inertial>
           <inertia>
@@ -360,56 +305,7 @@
       <static>false</static>
       <self_collide>false</self_collide>
     </model>
-    <model name='shelf_big_movai_1'>
-      <link name='link'>
-        <visual name='visual'>
-          <geometry>
-            <mesh>
-              <uri>file:///home/nthnmillar/Projects/Course/urdf/shelf/meshes/shelf_big_movai.dae</uri>
-            </mesh>
-          </geometry>
-        </visual>
-        <collision name='collision'>
-          <geometry>
-            <mesh>
-              <uri>file:///home/nthnmillar/Projects/Course/urdf/shelf/meshes/shelf_big_movai.dae</uri>
-            </mesh>
-          </geometry>
-        </collision>
-        <pose>0 0 0 0 0 0</pose>
-        <inertial>
-          <pose>0 0 0 0 0 0</pose>
-          <mass>1</mass>
-          <inertia>
-            <ixx>1</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>1</iyy>
-            <iyz>0</iyz>
-            <izz>1</izz>
-          </inertia>
-        </inertial>
-        <enable_wind>false</enable_wind>
-      </link>
-      <pose>0.86066726590895182 -9.0265905396175228 0.026765213753657636 -0.020885197459340869 -0.00097903740150069498 0.013730294588350822</pose>
-      <static>false</static>
-      <self_collide>false</self_collide>
-    </model>
-    <include>
-      <uri>file:///home/nthnmillar/.gz/fuel/fuel.gazebosim.org/openrobotics/models/grey wall/3</uri>
-      <name>grey_wall_1</name>
-      <pose>8.7146874436971267 -4.8914562428295838 0 0 0 1.5707999672671704</pose>
-    </include>
-    <include>
-      <uri>file:///home/nthnmillar/.gz/fuel/fuel.gazebosim.org/openrobotics/models/grey wall/3</uri>
-      <name>grey_wall_2</name>
-      <pose>-8.2394027806308348 -5.3095790530645495 0 0 0 1.5707999672671704</pose>
-    </include>
-    <include>
-      <uri>file:///home/nthnmillar/.gz/fuel/fuel.gazebosim.org/openrobotics/models/grey wall/3</uri>
-      <name>grey_wall_3</name>
-      <pose>-8.1943697350475766 1.2855843891396717 0 0 0 1.5707999672671704</pose>
-    </include>
+
     <light name='sun' type='directional'>
       <pose>0 0 10 0 0 0</pose>
       <cast_shadows>true</cast_shadows>

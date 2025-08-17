@@ -37,19 +37,21 @@ RUN apt-get update && apt-get install -y \
 # Set up workspace directory
 WORKDIR /ros2_ws
 
-# Create a script to build the workspace when needed
+# Copy source code and configuration files
+COPY . /ros2_ws/
+
+# Build the workspace during image build
+RUN bash -c "source /opt/ros/jazzy/setup.bash && \
+    cd /ros2_ws && \
+    rosdep install --from-paths src --ignore-src -r -y --skip-keys 'ros-jazzy-gz-ros2-control-demos' || true && \
+    colcon build --symlink-install"
+
+# Create a script to run the workspace
 RUN echo '#!/bin/bash\n\
 source /opt/ros/jazzy/setup.bash\n\
-if [ -d "src" ] && [ "$(ls -A src)" ]; then\n\
-    echo "Building workspace..."\n\
-    rosdep install --from-paths src --ignore-src -r -y\n\
-    colcon build --symlink-install\n\
-    echo "Workspace built successfully!"\n\
-else\n\
-    echo "No source code found. Mount your src/ directory as a volume."\n\
-fi\n\
-exec "$@"' > /usr/local/bin/build-and-run.sh && \
-    chmod +x /usr/local/bin/build-and-run.sh
+source /ros2_ws/install/setup.bash\n\
+exec "$@"' > /usr/local/bin/run.sh && \
+    chmod +x /usr/local/bin/run.sh
 
 # Source ROS2 in bashrc
 RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
@@ -58,5 +60,5 @@ RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 EXPOSE 11311 11312
 
 # Default command
-CMD ["/usr/local/bin/build-and-run.sh", "bash"]
+CMD ["/usr/local/bin/run.sh", "bash"]
 

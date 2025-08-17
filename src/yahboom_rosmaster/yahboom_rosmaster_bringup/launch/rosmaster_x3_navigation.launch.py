@@ -251,21 +251,6 @@ def generate_launch_description():
         default_value='true',
         description='Use simulation (Gazebo) clock if true')
 
-    # Specify the actions
-    # start_apriltag_dock_cmd = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource([default_apriltag_launch_path]),
-    #     launch_arguments={
-    #         'use_sim_time': use_sim_time,
-    #         'camera_namespace': camera_namespace
-    #     }.items()
-    # )
-
-    # start_assisted_teleop_cmd = Node(
-    #     package='yahboom_rosmaster_navigation',
-    #     executable='assisted_teleoperation.py',
-    #     output='screen',
-    #     parameters=[{'use_sim_time': use_sim_time}]
-    # )
 
     # Start the node that relays /cmd_vel to /mecanum_drive_controller/cmd_vel
     start_cmd_vel_relay_cmd = Node(
@@ -331,25 +316,14 @@ def generate_launch_description():
 
     # Static transform publisher for initial map to odom transform
     # This provides the initial map transform until SLAM takes over
-    # DISABLED: SLAM should not publish map->odom during mapping
-    # start_map_transform_cmd = Node(
-    #     package='tf2_ros',
-    #     executable='static_transform_publisher',
-    #     name='map_transform_publisher',
-    #     output='log',
-    #     arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom']
-    # )
+    start_map_transform_cmd = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='map_transform_publisher',
+        output='log',
+        arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom']
+    )
 
-    # Static transform publisher for initial map to base_footprint transform
-    # This is needed to provide an initial transform when SLAM is disabled
-    # start_static_transform_cmd = Node(
-    #     package='tf2_ros',
-    #     executable='static_transform_publisher',
-    #     name='static_transform_publisher',
-    #     output='screen',
-    #     arguments=['0', '0', '0', '0', '0', '0', 'map', 'base_footprint'],
-    #     condition=IfCondition(PythonExpression(['not ', slam]))
-    # )
 
     # Launch the ROS 2 Navigation Stack
     start_ros2_navigation_cmd = IncludeLaunchDescription(
@@ -412,15 +386,11 @@ def generate_launch_description():
     ld.add_action(declare_use_sim_time_cmd)
 
     # Add any actions
-    # ld.add_action(start_apriltag_dock_cmd)
-    # ld.add_action(start_assisted_teleop_cmd)
     ld.add_action(start_cmd_vel_relay_cmd)
     ld.add_action(start_ekf_cmd)
     ld.add_action(start_gazebo_cmd)
     ld.add_action(start_odom_transform_cmd)
-    # ld.add_action(start_map_transform_cmd)
-    # ld.add_action(start_static_transform_cmd)
-    # ld.add_action(start_nav_to_pose_cmd)
+    ld.add_action(start_map_transform_cmd)
     ld.add_action(start_ros2_navigation_cmd)
 
     return ld

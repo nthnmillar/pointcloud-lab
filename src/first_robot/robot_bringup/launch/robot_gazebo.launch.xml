@@ -13,10 +13,9 @@
         value="$(command 'xacro $(var urdf_path)')" />
   </node>
 
-  <!-- Empty world playing -->
+  <!--Test world playing -->
   <include file="$(find-pkg-share ros_gz_sim)/launch/gz_sim.launch.py">
     <arg name="gz_args" value="$(find-pkg-share robot_bringup)/worlds/test_world.sdf -r" />
-    <!-- <arg name="gz_args" value="empty.sdf -r" /> -->
   </include>
 
   <!-- Robot load -->

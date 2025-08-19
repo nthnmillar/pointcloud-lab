@@ -2,7 +2,7 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 
 def generate_launch_description():
-    # remap RTAB-Map topics to your robot’s camera & LiDAR
+    # remap RTAB-Map topics to robot’s camera & LiDAR
     remappings = [
         # 3D LiDAR
         ('scan_cloud',      '/lidar/points'),

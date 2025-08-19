@@ -44,7 +44,6 @@ def generate_launch_description():
             arguments=['-topic', 'robot_description']
         ),
 
-        # ros_gz_bridge with your gazebo_bridge.yaml
         Node(
             package='ros_gz_bridge',
             executable='parameter_bridge',

@@ -34,15 +34,12 @@ docker run -it \
   nthnmillar/pointcloud-lab:latest
 ```
 
-## Build From Source
+### Install & Run
 
 ```bash
 colcon build
 source install/setup.bash
-docker run -it \
-  -e DISPLAY=$DISPLAY \
-  -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
-  nthnmillar/pointcloud-lab
+ros2 launch yahboom_rosmaster_bringup yahboom_slam.launch.py gz_headless:=true
 ```
 
 ## Docker Hub

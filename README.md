@@ -1,10 +1,10 @@
 # Pointcloud-lab
 
-A simulated mecanum robot with 3D LiDAR for testing recording and processing lidar point cloud data.
+A simulated mecanum robot with 3D LiDAR for testing, recording processing lidar point cloud data.
 
 ## What This Solves
 
-My previous robot from another Udemy tutorial lacked SLAM, so the 3D LiDAR attached to it appeared to smear in Rviz regardless of IMU and odometry sensor fusion which I attempted with an EKF filter. So I rebuilt another yahboom mecanum robot which included nav2 slam data into its EKF filter.
+3D LiDAR attached to a previous robot sim I built appeared to smear in Rviz regardless of IMU and odometry sensor fusion which I attempted with an EKF filter. So I rebuilt another yahboom mecanum robot which included nav2 slam data into its EKF filter.
 
 ## The Problem
 
@@ -14,7 +14,7 @@ However, the lidar data visualised in Rviz from rotations were consistently out 
 
 ## The Solution
 
-I noticed that the default teleop controls were smearing the lidar data, whereas another script controlling the robot with acceleration and deceleration did not smear lidar point clouds. So I later found that I resolved the rotation lidar smearing issue by building slam friendly controls. This is where instead of controlling a robot with sudden and erratic movements such as with the default ros2 teleop keyboard controls, these controls have acceleration and decelerate for all movement. This allows for SLAM friendly trajectories and predictable motion for consistent lidar position tracking.
+I noticed that the default teleop controls were smearing the lidar data, whereas another script controlling the robot with acceleration and deceleration did not smear lidar point clouds. So I later found that I resolved the rotation lidar smearing issue by building slam friendly controls. This is where instead of controlling a robot with sudden and erratic movements such as with the default ros2 teleop keyboard controls. These controls have acceleration and decelerate for all movement, which allow for SLAM friendly trajectories and predictable motion for consistent lidar position tracking.
 
 ## Quick Start
 
@@ -40,6 +40,16 @@ docker run -it \
 colcon build
 source install/setup.bash
 ros2 launch yahboom_rosmaster_bringup yahboom_slam.launch.py gz_headless:=true
+```
+
+### Robot Controls
+
+```bash
+Open additional terminal
+if using docker:
+docker exec -it <container_name_or_id> /bin/bash
+L
+ros2 run yahboom_rosmaster_system_tests smooth_keyboard_controller
 ```
 
 ## Docker Hub

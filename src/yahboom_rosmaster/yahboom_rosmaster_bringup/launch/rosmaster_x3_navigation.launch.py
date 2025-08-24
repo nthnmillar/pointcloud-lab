@@ -275,7 +275,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource([gazebo_launch_file]),
         launch_arguments={
             'enable_odom_tf': enable_odom_tf,
-            'headless': headless,
+            'gz_headless': headless,
             'jsp_gui': jsp_gui,
             'load_controllers': load_controllers,
             'robot_name': robot_name,

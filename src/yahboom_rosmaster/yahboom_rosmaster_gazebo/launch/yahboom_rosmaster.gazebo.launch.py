@@ -63,7 +63,7 @@ def generate_launch_description():
 
     # Launch configuration variables
     enable_odom_tf = LaunchConfiguration('enable_odom_tf')
-    headless = LaunchConfiguration('headless')
+    gz_headless = LaunchConfiguration('gz_headless')
     jsp_gui = LaunchConfiguration('jsp_gui')
     load_controllers = LaunchConfiguration('load_controllers')
     robot_name = LaunchConfiguration('robot_name')
@@ -91,10 +91,10 @@ def generate_launch_description():
         choices=['true', 'false'],
         description='Whether to enable odometry transform broadcasting via ROS 2 Control')
 
-    declare_headless_cmd = DeclareLaunchArgument(
-        name='headless',
-        default_value='False',
-        description='Whether to execute gzclient (visualization)')
+    declare_gz_headless_cmd = DeclareLaunchArgument(
+        name='gz_headless',
+        default_value='false',
+        description='Whether to run Gazebo in headless mode - false = show Gazebo GUI window (default), true = no GUI but full simulation')
 
     declare_robot_name_cmd = DeclareLaunchArgument(
         name='robot_name',
@@ -189,7 +189,7 @@ def generate_launch_description():
     start_gazebo_client_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')),
         launch_arguments={'gz_args': ['-g ']}.items(),
-        condition=IfCondition(PythonExpression(['not ', headless]))
+        condition=IfCondition(PythonExpression(['not ', gz_headless]))
     )
 
     # ROS-Gazebo bridge for topics and messages
@@ -231,7 +231,7 @@ def generate_launch_description():
 
     # Add launch arguments
     ld.add_action(declare_enable_odom_tf_cmd)
-    ld.add_action(declare_headless_cmd)
+    ld.add_action(declare_gz_headless_cmd)
     ld.add_action(declare_robot_name_cmd)
     ld.add_action(declare_rviz_config_file_cmd)
     ld.add_action(declare_jsp_gui_cmd)

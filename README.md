@@ -8,7 +8,7 @@ A simulated mecanum robot with 3D LiDAR for testing, recording processing lidar 
 
 ## The Problem
 
-To minimize lidar scan smearing in Rviz, I attempted some EKF calibration with cursor to minimize smearing, tweaking noise covariance and how much odom vs IMU effects the robot's yaw rotation. Then, switching between using odom and map as the world reference, and then back to using odom again but using nav2's amcl_pose instead to get localisation.
+To minimize lidar scan smearing in Rviz, I attempted some EKF calibration to minimize smearing, tweaking noise covariance and how much odom vs IMU effects the robot's yaw rotation. Then, switching between using odom and map as the world reference, and then back to using odom again but using nav2's amcl_pose instead to get localisation.
 
 However, the lidar data visualised in Rviz from rotations were consistently out of sync with the SLAM map when the yahboom robot rotated, whereas the lidar data snapped back on the map when translating in position. I planned on attempting to make a filter that only recorded accurate lidar data during robot translation, and disregarded lidar data from rotation.
 
@@ -55,6 +55,28 @@ docker exec -it <container_name_or_id> /bin/bash
 ```bash
 ros2 run yahboom_rosmaster_system_tests smooth_keyboard_controller
 ```
+
+## Credits & License
+
+This project is based on the [yahboom_rosmaster](https://github.com/automaticaddison/yahboom_rosmaster) project by [Automatic Addison](https://automaticaddison.com/), which is licensed under the BSD 3-Clause License.
+
+### Original Project
+- **Repository**: [automaticaddison/yahboom_rosmaster](https://github.com/automaticaddison/yahboom_rosmaster)
+- **Author**: Automatic Addison
+- **License**: BSD 3-Clause License
+
+### Modifications
+This project includes significant modifications and additions:
+- 3D lidar scanner intergration
+- Rviz config to visualise point clouds and SLAM
+- Optimised EKF filter
+- Revised Gazebo world with perimeter walls and obstacles
+- Contoller script with acceleration and velocity suitable for localisation
+- Docker containerization with GUI support
+- Headless mode implementation for Gazebo
+
+## License
+This project is also licensed under the BSD 3-Clause License. See [LICENSE](LICENSE) file for details.
 
 ## Docker Hub
 

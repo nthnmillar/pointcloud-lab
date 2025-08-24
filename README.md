@@ -46,6 +46,7 @@ ros2 launch yahboom_rosmaster_bringup yahboom_slam.launch.py gz_headless:=true
 
 
 Open additional terminal
+
 if using docker:
 ```bash
 docker exec -it <container_name_or_id> /bin/bash
@@ -53,7 +54,7 @@ docker exec -it <container_name_or_id> /bin/bash
 
 ```bash
 ros2 run yahboom_rosmaster_system_tests smooth_keyboard_controller
-
+```
 
 ## Docker Hub
 

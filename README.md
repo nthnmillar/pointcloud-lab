@@ -1,20 +1,20 @@
 # Pointcloud-lab
 
-A simulated mecanum robot with 3D LiDAR for testing, recording processing lidar point cloud data.
+A simulated mecanum robot with a 3D LiDAR sensor for testing, recording processing lidar point cloud data.
 
 ## What This Solves
 
-3D LiDAR attached to a previous robot sim I built appeared to smear in Rviz regardless of IMU and odometry sensor fusion which I attempted with an EKF filter. So I rebuilt another yahboom mecanum robot which included nav2 slam data into its EKF filter.
+A 3D LiDAR sensor attached to the first robot sim from a Udemy tutorial appeared to smear in Rviz. This happened regardless of the IMU and odometry sensor fusion I attempted with an EKF filter. So I rebuilt another yahboom mecanum robot from another tutorial which included nav2 SLAM in its EKF filter.
 
 ## The Problem
 
-To minimize lidar scan smearing in Rviz, I attempted some EKF calibration to minimize smearing, tweaking noise covariance and how much odom vs IMU effects the robot's yaw rotation. Then, switching between using odom and map as the world reference, and then back to using odom again but using nav2's amcl_pose instead to get localisation.
+To minimize the point cloud smearing in Rviz, I attempted some EKF calibration. I tweaked noise covariance and how much odom vs IMU affects the robot's yaw rotation. Then I switched between using odom and map as the world reference, and then back to using odom again but using nav2's amcl_pose instead to get localisation.
 
-However, the lidar data visualised in Rviz from rotations were consistently out of sync with the SLAM map when the yahboom robot rotated, whereas the lidar data snapped back on the map when translating in position. I planned on attempting to make a filter that only recorded accurate lidar data during robot translation, and disregarded lidar data from rotation.
+However, the point clouds visualised in Rviz from rotations was consistently out of sync with the SLAM map when the yahboom robot rotated. The point clouds snapped back on the map when translating in position. I planned on attempting to make a filter that only recorded accurate point clouds during robot translation, and disregarded point clouds from rotation.
 
 ## The Solution
 
-I noticed that the default teleop controls were smearing the lidar data, whereas another script controlling the robot with acceleration and deceleration did not smear lidar point clouds. So I later found that I resolved the rotation lidar smearing issue by building slam friendly controls. This is where instead of controlling a robot with sudden and erratic movements such as with the default ros2 teleop keyboard controls. These controls have acceleration and decelerate for all movement, which allow for SLAM friendly trajectories and predictable motion for consistent lidar position tracking.
+I noticed that the default teleop controls were smearing the point clouds, whereas another script controlling the robot with acceleration and deceleration did not smear point clouds. So I later found that I resolved the rotation point cloud smearing issue by building SLAM friendly controls. This is where instead of controlling a robot with sudden and erratic movements, such as with the default ros2 teleop keyboard controls, these controls have acceleration and deceleration for all movement. This allows for SLAM friendly trajectories and predictable motion for consistent lidar position tracking.
 
 ## Quick Start
 
@@ -44,10 +44,9 @@ ros2 launch yahboom_rosmaster_bringup yahboom_slam.launch.py gz_headless:=true
 
 ### Robot Controls
 
+Open an additional terminal.
 
-Open additional terminal
-
-if using docker:
+If using docker:
 ```bash
 docker exec -it <container_name_or_id> /bin/bash
 ```
@@ -58,20 +57,15 @@ ros2 run yahboom_rosmaster_system_tests smooth_keyboard_controller
 
 ## Credits & License
 
-This project is based on the [yahboom_rosmaster](https://github.com/automaticaddison/yahboom_rosmaster) project by [Automatic Addison](https://automaticaddison.com/), which is licensed under the BSD 3-Clause License.
-
-### Original Project
-- **Repository**: [automaticaddison/yahboom_rosmaster](https://github.com/automaticaddison/yahboom_rosmaster)
-- **Author**: Automatic Addison
-- **License**: BSD 3-Clause License
+This project incorporates elements from the [yahboom_rosmaster](https://github.com/automaticaddison/yahboom_rosmaster) project by [Automatic Addison](https://automaticaddison.com/), which is licensed under the BSD 3-Clause License. 
 
 ### Modifications
 This project includes significant modifications and additions:
-- 3D lidar scanner intergration
+- 3D lidar scanner integration
 - Rviz config to visualise point clouds and SLAM
 - Optimised EKF filter
 - Revised Gazebo world with perimeter walls and obstacles
-- Contoller script with acceleration and velocity suitable for localisation
+- Controller script with acceleration and velocity suitable for localisation
 - Docker containerization with GUI support
 - Headless mode implementation for Gazebo
 

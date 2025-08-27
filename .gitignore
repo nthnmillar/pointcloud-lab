@@ -28,7 +28,7 @@ cmake_install.cmake
 Makefile
 
 # Ignore images and data (optional, if large or not needed)
-*.png
-*.jpg
-images/
+# *.png
+# *.jpg
+# images/
 

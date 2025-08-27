@@ -6,7 +6,7 @@ A simulated mecanum robot with a 3D LiDAR sensor for testing, recording processi
 
 ## Background
 
-A 3D LiDAR sensor I attached to the first robot sim from a Udemy tutorial appeared to create blured and distorted point clouds in Rviz. This happened regardless of the IMU and odometry sensor fusion I attempted with an EKF filter. So I rebuilt another yahboom mecanum robot from another tutorial which included nav2 mapping with its EKF.
+A 3D LiDAR sensor I attached to the first robot sim from a Udemy tutorial appeared to create blurred and distorted point clouds in RViz. This happened regardless of the IMU and odometry sensor fusion I attempted with an EKF filter from robot_localization. So I rebuilt another Yahboom mecanum robot from another tutorial, which integrated Nav2 for navigation and robot_localization for EKF-based sensor fusion.
 
 ## The Problem
 

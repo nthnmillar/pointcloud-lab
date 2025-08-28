@@ -2,10 +2,7 @@
 
 A simulated mecanum robot with a 3D LiDAR sensor for testing, recording processing lidar point cloud data.
 
-![Yahboom Robot Scene](images/rviz/yahboom-scene.png)
-
-## Project Preview
-[![Project Demo](https://img.youtube.com/vi/32eJ2AiYbV0/0.jpg)](https://youtu.be/32eJ2AiYbV0)
+[![Yahboom Robot Scene](images/rviz/yahboom-scene.png)](https://youtu.be/32eJ2AiYbV0)
 
 [Watch Project Demo Video](https://youtu.be/32eJ2AiYbV0)
 
@@ -38,8 +35,9 @@ docker pull nthnmillar/pointcloud-lab:latest
 ```bash
 xhost +local:docker
 ```
+Run command suitable for your graphics card.
 
-**Most compatible (CPU rendering):**
+Intel/AMD (with /dev/dri access):
 ```bash
 docker run -it \
   -e DISPLAY=$DISPLAY \
@@ -47,22 +45,20 @@ docker run -it \
   --device /dev/dri \
   nthnmillar/pointcloud-lab
 ```
-
-**Intel/AMD (with /dev/dri access):**
-```bash
-docker run -it \
-  -e DISPLAY=$DISPLAY \
-  -v /tmp/.X11-unix:/tmp/.X11-unix \
-  --device /dev/dri \
-  nthnmillar/pointcloud-lab
-```
-
-**NVIDIA (requires NVIDIA Container Toolkit installed):**
+NVIDIA (requires NVIDIA Container Toolkit installed):
 ```bash
 docker run -it \
   -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
   --gpus all \
+  nthnmillar/pointcloud-lab
+```
+CPU software rendering (fallback if no GPU or toolkit):
+```bash
+docker run -it \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -e LIBGL_ALWAYS_SOFTWARE=1 \
   nthnmillar/pointcloud-lab
 ```
 

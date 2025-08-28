@@ -4,13 +4,18 @@ A simulated mecanum robot with a 3D LiDAR sensor for testing, recording processi
 
 ![Yahboom Robot Scene](images/rviz/yahboom-scene.png)
 
+## Project Preview
+[![Project Demo](https://img.youtube.com/vi/32eJ2AiYbV0/0.jpg)](https://youtu.be/32eJ2AiYbV0)
+
+[Watch Project Demo Video](https://youtu.be/32eJ2AiYbV0)
+
 ## Background
 
-A 3D LiDAR sensor I attached to the first robot sim from a Udemy tutorial appeared to create blurred and distorted point clouds in RViz. This happened regardless of the IMU and odometry sensor fusion I attempted with an EKF filter from robot_localization. So I rebuilt another Yahboom mecanum robot from another tutorial, which integrated Nav2 for navigation and robot_localization for EKF-based sensor fusion.
+A 3D LiDAR sensor I attached to the first robot sim from a Udemy tutorial appeared to create blurred and distorted point clouds in RViz. This happened regardless of the IMU and odometry sensor fusion I attempted with an EKF filter from robot_localization. So I rebuilt another Yahboom mecanum robot from another tutorial, which integrated Nav2 for navigation and robot localization for EKF-based sensor fusion.
 
 ## The Problem
 
-To minimize the point cloud distortion in Rviz, I attempted some EKF calibration. I tweaked noise covariance and how much odom vs IMU affects the robot's yaw rotation. Then I switched between using odom and the nav2 map as the world reference, and then back to using odom again but using nav2's amcl_pose instead to get localisation.
+To minimize the point cloud distortion in Rviz, I attempted some EKF calibration, tweaked noise covariance, and how much odom vs IMU affects the robot's yaw rotation. Then I switched between using odom and the nav2 map as the world reference, and then back to using odom again but using nav2's amcl_pose instead to get localisation.
 
 However, the point clouds visualised in Rviz from rotations were consistently out of sync when the yahboom robot rotated. The point clouds snapped back on the map when translating in position. I planned on attempting to make a filter that only recorded accurate point clouds during robot translation, and disregarded point clouds from rotation.
 
@@ -19,7 +24,7 @@ However, the point clouds visualised in Rviz from rotations were consistently ou
 I attempted using SLAM Toolbox instead for real time mapping, and noticed that the default teleop controls were distorting the point clouds, whereas another script controlling the robot with acceleration and deceleration did not distort point clouds. So I later found that I resolved the rotation point cloud distortion issue by building SLAM friendly controls. This is where instead of controlling a robot with sudden and erratic movements, such as with the default ros2 teleop keyboard controls, these controls have acceleration and deceleration for all movement. This allows for SLAM friendly trajectories and predictable motion for consistent point cloud position tracking.
 
 ## Future Work
-- Point cloud filtering
+- Point cloud filtering and processing
 - Visualization tools
 
 ## Quick Start
@@ -33,9 +38,8 @@ docker pull nthnmillar/pointcloud-lab:latest
 ```bash
 xhost +local:docker
 ```
-Run command suitable for your graphics card.
 
-Intel/AMD (with /dev/dri access):
+**Most compatible (CPU rendering):**
 ```bash
 docker run -it \
   -e DISPLAY=$DISPLAY \
@@ -43,20 +47,22 @@ docker run -it \
   --device /dev/dri \
   nthnmillar/pointcloud-lab
 ```
-NVIDIA (requires NVIDIA Container Toolkit installed):
+
+**Intel/AMD (with /dev/dri access):**
+```bash
+docker run -it \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  --device /dev/dri \
+  nthnmillar/pointcloud-lab
+```
+
+**NVIDIA (requires NVIDIA Container Toolkit installed):**
 ```bash
 docker run -it \
   -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
   --gpus all \
-  nthnmillar/pointcloud-lab
-```
-CPU software rendering (fallback if no GPU or toolkit):
-```bash
-docker run -it \
-  -e DISPLAY=$DISPLAY \
-  -v /tmp/.X11-unix:/tmp/.X11-unix \
-  -e LIBGL_ALWAYS_SOFTWARE=1 \
   nthnmillar/pointcloud-lab
 ```
 

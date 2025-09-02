@@ -32,3 +32,18 @@ Makefile
 # *.jpg
 # images/
 
+# LiDAR recorded data (large files, don't commit)
+recorded_lidar_data/
+raw_data/
+filtered_data/
+lidar_recording*/
+*.pcd
+*.ply
+*.laz
+*.bag
+*.db3
+
+# ROS2 bag files
+*.db3
+*.bag
+

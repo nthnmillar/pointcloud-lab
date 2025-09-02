@@ -1,0 +1,45 @@
+# LiDAR Filtering Presets
+# These presets can be used with the lidar_recorder node
+
+# High density - minimal filtering for detailed scans
+high_density:
+  voxel_size: 0.05
+  remove_outliers: true
+  outlier_std_dev: 1.5
+  outlier_min_neighbors: 8
+
+# Medium density - balanced filtering for most use cases
+medium_density:
+  voxel_size: 0.1
+  remove_outliers: true
+  outlier_std_dev: 2.0
+  outlier_min_neighbors: 10
+
+# Low density - aggressive filtering for fast processing
+low_density:
+  voxel_size: 0.2
+  remove_outliers: true
+  outlier_std_dev: 2.5
+  outlier_min_neighbors: 12
+
+# No filtering - raw data only
+raw_data:
+  voxel_size: 0.0
+  remove_outliers: false
+  outlier_std_dev: 2.0
+  outlier_min_neighbors: 10
+
+# Outdoor environment - optimized for outdoor LiDAR
+outdoor:
+  voxel_size: 0.15
+  remove_outliers: true
+  outlier_std_dev: 3.0
+  outlier_min_neighbors: 15
+
+# Indoor environment - optimized for indoor LiDAR
+indoor:
+  voxel_size: 0.08
+  remove_outliers: true
+  outlier_std_dev: 1.8
+  outlier_min_neighbors: 8
+

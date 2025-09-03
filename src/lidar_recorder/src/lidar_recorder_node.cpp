@@ -28,7 +28,8 @@ public:
         this->declare_parameter("filtered", true);
         this->declare_parameter("filter_lvl", 0.1);
         this->declare_parameter("save_individual_files", false);
-        this->declare_parameter("output_format", "ply");
+        this->declare_parameter("pcd", true);
+        this->declare_parameter("ply", true);
         this->declare_parameter("stop_recording", false);
         
         output_dir_ = this->get_parameter("output_dir").as_string();
@@ -37,7 +38,8 @@ public:
         filtered_ = this->get_parameter("filtered").as_bool();
         filter_lvl_ = this->get_parameter("filter_lvl").as_double();
         save_individual_files_ = this->get_parameter("save_individual_files").as_bool();
-        output_format_ = this->get_parameter("output_format").as_string();
+        pcd_ = this->get_parameter("pcd").as_bool();
+        ply_ = this->get_parameter("ply").as_bool();
         stop_recording_ = this->get_parameter("stop_recording").as_bool();
         
         // Create output directory
@@ -56,7 +58,8 @@ public:
         
         RCLCPP_INFO(this->get_logger(), "LiDAR Recorder started. Recording from topic: %s", topic_name_.c_str());
         RCLCPP_INFO(this->get_logger(), "Output directory: %s", output_dir_.c_str());
-        RCLCPP_INFO(this->get_logger(), "Output format: %s", output_format_.c_str());
+        RCLCPP_INFO(this->get_logger(), "PCD format: %s", pcd_ ? "enabled" : "disabled");
+        RCLCPP_INFO(this->get_logger(), "PLY format: %s", ply_ ? "enabled" : "disabled");
         RCLCPP_INFO(this->get_logger(), "Save individual files: %s", save_individual_files_ ? "enabled" : "disabled");
         RCLCPP_INFO(this->get_logger(), "Press Ctrl+C to stop recording and save data");
     }
@@ -171,12 +174,13 @@ private:
         // Save raw point cloud if requested
         std::string raw_filename;
         if (raw_) {
-            if (output_format_ == "ply") {
-                raw_filename = save_dir + "/pointcloud_raw.ply";
-                save_to_ply(raw_filename, combined_cloud);
-            } else {
+            if (pcd_) {
                 raw_filename = save_dir + "/pointcloud_raw.pcd";
                 pcl::io::savePCDFile(raw_filename, *combined_cloud);
+            }
+            if (ply_) {
+                raw_filename = save_dir + "/pointcloud_raw.ply";
+                save_to_ply(raw_filename, combined_cloud);
             }
         }
         
@@ -192,12 +196,13 @@ private:
                         combined_cloud->size(), filtered_cloud->size());
             
             // Save filtered point cloud
-            if (output_format_ == "ply") {
-                filtered_filename = save_dir + "/pointcloud_filtered.ply";
-                save_to_ply(filtered_filename, filtered_cloud);
-            } else {
+            if (pcd_) {
                 filtered_filename = save_dir + "/pointcloud_filtered.pcd";
                 pcl::io::savePCDFile(filtered_filename, *filtered_cloud);
+            }
+            if (ply_) {
+                filtered_filename = save_dir + "/pointcloud_filtered.ply";
+                save_to_ply(filtered_filename, filtered_cloud);
             }
         } else {
             RCLCPP_INFO(this->get_logger(), "No filtering applied, raw data only");
@@ -241,7 +246,8 @@ private:
     bool filtered_;
     double filter_lvl_;
     bool save_individual_files_;
-    std::string output_format_;
+    bool pcd_;
+    bool ply_;
     bool stop_recording_;
     
     std::vector<std::pair<std::chrono::high_resolution_clock::time_point, 

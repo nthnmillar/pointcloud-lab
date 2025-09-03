@@ -48,10 +48,16 @@ def generate_launch_description():
         description='Whether to save individual PCD files for each message'
     )
     
-    output_format_arg = DeclareLaunchArgument(
-        'output_format',
-        default_value='ply',
-        description='Output format: ply or pcd'
+    pcd_arg = DeclareLaunchArgument(
+        'pcd',
+        default_value='true',
+        description='Save data in PCD format'
+    )
+    
+    ply_arg = DeclareLaunchArgument(
+        'ply',
+        default_value='true',
+        description='Save data in PLY format'
     )
     
     stop_recording_arg = DeclareLaunchArgument(
@@ -73,7 +79,8 @@ def generate_launch_description():
             'filtered': LaunchConfiguration('filtered'),
             'filter_lvl': LaunchConfiguration('filter_lvl'),
             'save_individual_files': LaunchConfiguration('save_individual_files'),
-            'output_format': LaunchConfiguration('output_format'),
+            'pcd': LaunchConfiguration('pcd'),
+            'ply': LaunchConfiguration('ply'),
             'stop_recording': LaunchConfiguration('stop_recording'),
         }],
         remappings=[
@@ -88,7 +95,8 @@ def generate_launch_description():
         filtered_arg,
         filter_lvl_arg,
         save_individual_files_arg,
-        output_format_arg,
+        pcd_arg,
+        ply_arg,
         stop_recording_arg,
         lidar_recorder_node,
     ])

@@ -24,21 +24,21 @@ public:
         // Parameters
         this->declare_parameter("output_dir", "recorded_lidar_data");
         this->declare_parameter("topic_name", "/lidar/points");
-        this->declare_parameter("voxel_size", 0.1);
-        this->declare_parameter("remove_outliers", true);
-        this->declare_parameter("outlier_std_dev", 2.0);
-        this->declare_parameter("outlier_min_neighbors", 10);
+        this->declare_parameter("raw", true);
+        this->declare_parameter("filtered", true);
+        this->declare_parameter("filter_lvl", 0.1);
         this->declare_parameter("save_individual_files", false);
         this->declare_parameter("output_format", "ply");
+        this->declare_parameter("stop_recording", false);
         
         output_dir_ = this->get_parameter("output_dir").as_string();
         topic_name_ = this->get_parameter("topic_name").as_string();
-        voxel_size_ = this->get_parameter("voxel_size").as_double();
-        remove_outliers_ = this->get_parameter("remove_outliers").as_bool();
-        outlier_std_dev_ = this->get_parameter("outlier_std_dev").as_double();
-        outlier_min_neighbors_ = this->get_parameter("outlier_min_neighbors").as_int();
+        raw_ = this->get_parameter("raw").as_bool();
+        filtered_ = this->get_parameter("filtered").as_bool();
+        filter_lvl_ = this->get_parameter("filter_lvl").as_double();
         save_individual_files_ = this->get_parameter("save_individual_files").as_bool();
         output_format_ = this->get_parameter("output_format").as_string();
+        stop_recording_ = this->get_parameter("stop_recording").as_bool();
         
         // Create output directory
         std::filesystem::create_directories(output_dir_);
@@ -92,6 +92,14 @@ private:
     
     void status_timer_callback()
     {
+        // Check if stop recording was requested (check parameter dynamically)
+        if (this->get_parameter("stop_recording").as_bool()) {
+            RCLCPP_INFO(this->get_logger(), "Stop recording requested. Saving data and shutting down...");
+            save_recorded_data();
+            rclcpp::shutdown();
+            return;
+        }
+        
         std_msgs::msg::String status_msg;
         status_msg.data = "Recording: " + std::to_string(point_clouds_.size()) + " point clouds captured";
         status_pub_->publish(status_msg);
@@ -160,40 +168,39 @@ private:
             *combined_cloud += *cloud;
         }
         
-        // Apply voxel grid filtering
+        // Save raw point cloud if requested
+        std::string raw_filename;
+        if (raw_) {
+            if (output_format_ == "ply") {
+                raw_filename = save_dir + "/pointcloud_raw.ply";
+                save_to_ply(raw_filename, combined_cloud);
+            } else {
+                raw_filename = save_dir + "/pointcloud_raw.pcd";
+                pcl::io::savePCDFile(raw_filename, *combined_cloud);
+            }
+        }
+        
+        // Apply filtering if requested
         pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        if (voxel_size_ > 0.0) {
+        std::string filtered_filename;
+        if (filtered_ && filter_lvl_ > 0.0) {
             pcl::VoxelGrid<pcl::PointXYZ> voxel_filter;
             voxel_filter.setInputCloud(combined_cloud);
-            voxel_filter.setLeafSize(voxel_size_, voxel_size_, voxel_size_);
+            voxel_filter.setLeafSize(filter_lvl_, filter_lvl_, filter_lvl_);
             voxel_filter.filter(*filtered_cloud);
-            RCLCPP_INFO(this->get_logger(), "Voxel filtering: %zu -> %zu points", 
+            RCLCPP_INFO(this->get_logger(), "Filtering applied: %zu -> %zu points", 
                         combined_cloud->size(), filtered_cloud->size());
+            
+            // Save filtered point cloud
+            if (output_format_ == "ply") {
+                filtered_filename = save_dir + "/pointcloud_filtered.ply";
+                save_to_ply(filtered_filename, filtered_cloud);
+            } else {
+                filtered_filename = save_dir + "/pointcloud_filtered.pcd";
+                pcl::io::savePCDFile(filtered_filename, *filtered_cloud);
+            }
         } else {
-            *filtered_cloud = *combined_cloud;
-        }
-        
-        // Remove outliers if requested
-        if (remove_outliers_ && !filtered_cloud->empty()) {
-            pcl::PointCloud<pcl::PointXYZ>::Ptr outlier_filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-            pcl::StatisticalOutlierRemoval<pcl::PointXYZ> outlier_filter;
-            outlier_filter.setInputCloud(filtered_cloud);
-            outlier_filter.setMeanK(outlier_min_neighbors_);
-            outlier_filter.setStddevMulThresh(outlier_std_dev_);
-            outlier_filter.filter(*outlier_filtered_cloud);
-            RCLCPP_INFO(this->get_logger(), "Outlier removal: %zu -> %zu points", 
-                        filtered_cloud->size(), outlier_filtered_cloud->size());
-            *filtered_cloud = *outlier_filtered_cloud;
-        }
-        
-        // Save filtered point cloud in specified format
-        std::string filtered_filename;
-        if (output_format_ == "ply") {
-            filtered_filename = save_dir + "/filtered_pointcloud.ply";
-            save_to_ply(filtered_filename, filtered_cloud);
-        } else {
-            filtered_filename = save_dir + "/filtered_pointcloud.pcd";
-            pcl::io::savePCDFile(filtered_filename, *filtered_cloud);
+            RCLCPP_INFO(this->get_logger(), "No filtering applied, raw data only");
         }
         
         // Save metadata
@@ -204,25 +211,38 @@ private:
             metadata << "Topic: " << topic_name_ << "\n";
             metadata << "Total point clouds: " << point_clouds_.size() << "\n";
             metadata << "Combined point cloud size: " << combined_cloud->size() << " points\n";
-            metadata << "Filtered point cloud size: " << filtered_cloud->size() << " points\n";
-            metadata << "Voxel size: " << voxel_size_ << "\n";
-            metadata << "Outlier removal: " << (remove_outliers_ ? "enabled" : "disabled") << "\n";
+            if (raw_) {
+                metadata << "Raw data: enabled\n";
+            } else {
+                metadata << "Raw data: disabled\n";
+            }
+            if (filtered_ && filter_lvl_ > 0.0) {
+                metadata << "Filtered point cloud size: " << filtered_cloud->size() << " points\n";
+                metadata << "Filter level: " << filter_lvl_ << "\n";
+            } else {
+                metadata << "Filtering: disabled\n";
+            }
             metadata.close();
         }
         
         RCLCPP_INFO(this->get_logger(), "Data saved to: %s", save_dir.c_str());
-        RCLCPP_INFO(this->get_logger(), "Filtered point cloud: %s", filtered_filename.c_str());
-        RCLCPP_INFO(this->get_logger(), "Individual PCD files: %zu files", point_clouds_.size());
+        if (raw_) {
+            RCLCPP_INFO(this->get_logger(), "Raw point cloud: %s", raw_filename.c_str());
+        }
+        if (filtered_ && filter_lvl_ > 0.0) {
+            RCLCPP_INFO(this->get_logger(), "Filtered point cloud: %s", filtered_filename.c_str());
+        }
+        RCLCPP_INFO(this->get_logger(), "Individual files: %zu files", point_clouds_.size());
     }
     
     std::string output_dir_;
     std::string topic_name_;
-    double voxel_size_;
-    bool remove_outliers_;
-    double outlier_std_dev_;
-    int outlier_min_neighbors_;
+    bool raw_;
+    bool filtered_;
+    double filter_lvl_;
     bool save_individual_files_;
     std::string output_format_;
+    bool stop_recording_;
     
     std::vector<std::pair<std::chrono::high_resolution_clock::time_point, 
                           pcl::PointCloud<pcl::PointXYZ>::Ptr>> point_clouds_;

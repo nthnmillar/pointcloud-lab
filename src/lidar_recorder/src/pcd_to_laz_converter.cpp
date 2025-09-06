@@ -6,7 +6,7 @@
 #include <pcl/visualization/pcl_visualizer.h>
 
 #ifdef HAVE_LASZIP
-#include <laszip/laszip.h>
+#include <laszip/laszip_api.h>
 #endif
 
 #include <chrono>
@@ -126,19 +126,30 @@ private:
         
         // Initialize LASzip
         laszip_POINTER laszip_writer;
-        if (laszip_create(&laszip_writer) != LASZIP_OK) {
+        if (laszip_create(&laszip_writer) != 0) {
             RCLCPP_ERROR(this->get_logger(), "Failed to create LASzip writer!");
             return false;
         }
         
-        // Set header
-        laszip_header header;
-        memset(&header, 0, sizeof(laszip_header));
+        // Get header and point pointers
+        laszip_header_struct* header;
+        laszip_point_struct* point;
+        if (laszip_get_header_pointer(laszip_writer, &header) != 0) {
+            RCLCPP_ERROR(this->get_logger(), "Failed to get LASzip header pointer!");
+            laszip_destroy(laszip_writer);
+            return false;
+        }
         
-        header.version_major = 1;
-        header.version_minor = 2;
-        header.point_data_format = point_format_;
-        header.point_data_record_length = 20; // XYZ format
+        if (laszip_get_point_pointer(laszip_writer, &point) != 0) {
+            RCLCPP_ERROR(this->get_logger(), "Failed to get LASzip point pointer!");
+            laszip_destroy(laszip_writer);
+            return false;
+        }
+        
+        header->version_major = 1;
+        header->version_minor = 2;
+        header->point_data_format = point_format_;
+        header->point_data_record_length = 20; // XYZ format
         
         // Calculate bounds
         double min_x = std::numeric_limits<double>::max();
@@ -157,48 +168,38 @@ private:
             max_z = std::max(max_z, static_cast<double>(point.z));
         }
         
-        header.min_x = min_x;
-        header.min_y = min_y;
-        header.min_z = min_z;
-        header.max_x = max_x;
-        header.max_y = max_y;
-        header.max_z = max_z;
+        header->min_x = min_x;
+        header->min_y = min_y;
+        header->min_z = min_z;
+        header->max_x = max_x;
+        header->max_y = max_y;
+        header->max_z = max_z;
         
-        header.x_offset = (min_x + max_x) / 2.0;
-        header.y_offset = (min_y + max_y) / 2.0;
-        header.z_offset = (min_z + max_z) / 2.0;
-        header.x_scale_factor = 0.001; // 1mm precision
-        header.y_scale_factor = 0.001;
-        header.z_scale_factor = 0.001;
+        header->x_offset = (min_x + max_x) / 2.0;
+        header->y_offset = (min_y + max_y) / 2.0;
+        header->z_offset = (min_z + max_z) / 2.0;
+        header->x_scale_factor = 0.001; // 1mm precision
+        header->y_scale_factor = 0.001;
+        header->z_scale_factor = 0.001;
         
-        header.number_of_point_records = pcl_cloud->size();
-        header.number_of_points_by_return[0] = pcl_cloud->size();
+        header->number_of_point_records = pcl_cloud->size();
+        header->number_of_points_by_return[0] = pcl_cloud->size();
         
-        // Set header
-        if (laszip_set_header(laszip_writer, &header) != LASZIP_OK) {
-            RCLCPP_ERROR(this->get_logger(), "Failed to set LASzip header!");
-            laszip_destroy(laszip_writer);
-            return false;
-        }
-        
-        // Open for writing
-        if (laszip_open_writer(laszip_writer, output_laz_.c_str(), 1) != LASZIP_OK) {
+        // Open for writing with compression
+        if (laszip_open_writer(laszip_writer, output_laz_.c_str(), 1) != 0) {
             RCLCPP_ERROR(this->get_logger(), "Failed to open LAZ file for writing!");
             laszip_destroy(laszip_writer);
             return false;
         }
         
         // Write points
-        laszip_point point;
-        memset(&point, 0, sizeof(laszip_point));
-        
         size_t points_written = 0;
         for (const auto& pcl_point : pcl_cloud->points) {
-            point.X = static_cast<laszip_I32>((pcl_point.x - header.x_offset) / header.x_scale_factor);
-            point.Y = static_cast<laszip_I32>((pcl_point.y - header.y_offset) / header.y_scale_factor);
-            point.Z = static_cast<laszip_I32>((pcl_point.z - header.z_offset) / header.z_scale_factor);
+            point->X = static_cast<laszip_I32>((pcl_point.x - header->x_offset) / header->x_scale_factor);
+            point->Y = static_cast<laszip_I32>((pcl_point.y - header->y_offset) / header->y_scale_factor);
+            point->Z = static_cast<laszip_I32>((pcl_point.z - header->z_offset) / header->z_scale_factor);
             
-            if (laszip_write_point(laszip_writer, &point) != LASZIP_OK) {
+            if (laszip_write_point(laszip_writer) != 0) {
                 RCLCPP_ERROR(this->get_logger(), "Failed to write point %zu!", points_written);
                 break;
             }
@@ -230,7 +231,7 @@ private:
             metadata << "Bounds: X[" << min_x << "," << max_x << "] ";
             metadata << "Y[" << min_y << "," << max_y << "] ";
             metadata << "Z[" << min_z << "," << max_z << "]\n";
-            metadata << "Scale factors: " << header.x_scale_factor << "\n";
+            metadata << "Scale factors: " << header->x_scale_factor << "\n";
             metadata.close();
         }
         

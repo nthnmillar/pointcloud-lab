@@ -1,20 +1,22 @@
 # LiDAR Recorder Package
 
-A comprehensive ROS2 package for LiDAR point cloud recording, filtering, and conversion. This package provides three separate tools for a flexible workflow:
+A comprehensive ROS2 package for LiDAR point cloud recording, filtering, and conversion. This package provides multiple tools for flexible workflows:
 
-1. **Bag Recorder** - Records raw LiDAR data to ROS bag files
-2. **Bag Filter** - Loads bag files, applies PCL filtering, and saves as PCD
-3. **PCD to LAZ Converter** - Converts PCD files to compressed LAZ format
+1. **LiDAR Recorder** - Records LiDAR data directly to PCD, PLY, and LAZ formats
+2. **Bag Recorder** - Records raw LiDAR data to ROS bag files
+3. **Bag Filter** - Loads bag files, applies PCL filtering, and saves as PCD
+4. **PCD to LAZ Converter** - Converts PCD files to compressed LAZ format
 
 Each tool includes visualization capabilities to monitor the process and verify results.
 
 ## Features
 
+- **Direct recording** - Record LiDAR data directly to PCD, PLY, and LAZ formats
 - **Flexible workflow** - Record first, then filter and convert
 - **Real-time recording** to ROS bag files with auto-stop
 - **Advanced filtering** with voxel grid, spatial filtering, and outlier removal
 - **Visualization** at each step using PCL visualizer and RViz
-- **Multiple output formats** - ROS bag, PCD, and LAZ
+- **Multiple output formats** - ROS bag, PCD, PLY, and LAZ
 - **Configurable parameters** for different use cases
 - **Metadata logging** for all operations
 
@@ -47,6 +49,39 @@ source install/setup.bash
 ```
 
 ## Workflow
+
+### Option 1: Direct Recording (Recommended)
+
+Record LiDAR data directly to multiple formats:
+
+```bash
+# Basic recording (PCD and PLY formats)
+ros2 launch lidar_recorder lidar_recorder.launch.py
+
+# Enable LAZ format (requires liblaszip)
+ros2 launch lidar_recorder lidar_recorder.launch.py \
+  laz:=true \
+  output_dir:=~/direct_recording
+
+# Custom recording with filtering
+ros2 launch lidar_recorder lidar_recorder.launch.py \
+  topic_name:=/lidar/points \
+  output_dir:=~/my_recording \
+  pcd:=true \
+  ply:=true \
+  laz:=true \
+  filtered:=true \
+  filter_lvl:=0.1
+```
+
+**Features:**
+- Records directly to PCD, PLY, and LAZ formats
+- Real-time point cloud combination
+- Optional voxel grid filtering
+- Auto-saves when stopped (Ctrl+C)
+- Metadata logging
+
+### Option 2: Bag-based Workflow
 
 ### Step 1: Record LiDAR Data to Bag
 
@@ -177,6 +212,20 @@ ros2 launch lidar_recorder pcd_to_laz.launch.py \
 ```
 
 ## Parameters
+
+### LiDAR Recorder (Direct Recording)
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `output_dir` | `recorded_lidar_data` | Output directory for recorded data |
+| `topic_name` | `/lidar/points` | LiDAR topic to subscribe to |
+| `raw` | `true` | Save raw (unfiltered) data |
+| `filtered` | `true` | Apply filtering and save filtered data |
+| `filter_lvl` | `0.1` | Voxel grid filter level (0.0 = no filtering) |
+| `save_individual_files` | `false` | Save individual PCD files for each message |
+| `pcd` | `true` | Save data in PCD format |
+| `ply` | `true` | Save data in PLY format |
+| `laz` | `false` | Save data in LAZ format (requires liblaszip) |
+| `stop_recording` | `false` | Set to true to stop recording and save data |
 
 ### Bag Recorder
 | Parameter | Default | Description |

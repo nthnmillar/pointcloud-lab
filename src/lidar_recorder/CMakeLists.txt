@@ -24,8 +24,8 @@ find_package(PCL REQUIRED COMPONENTS common io visualization)
 find_package(rosbag2_cpp REQUIRED)
 
 # Try to find LASzip for LAZ support
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(LASZIP liblaszip)
+find_library(LASZIP_LIBRARY NAMES laszip_api)
+find_path(LASZIP_INCLUDE_DIR NAMES laszip/laszip_api.h)
 
 # Include directories
 include_directories(include)
@@ -48,10 +48,13 @@ target_include_directories(lidar_recorder_node PRIVATE ${PCL_INCLUDE_DIRS})
 target_compile_definitions(lidar_recorder_node PRIVATE ${PCL_COMPILE_DEFINITIONS})
 
 # Add LASzip support if found
-if(LASZIP_FOUND)
-  target_link_libraries(lidar_recorder_node ${LASZIP_LIBRARIES})
-  target_include_directories(lidar_recorder_node PRIVATE ${LASZIP_INCLUDE_DIRS})
+if(LASZIP_LIBRARY AND LASZIP_INCLUDE_DIR)
+  target_link_libraries(lidar_recorder_node ${LASZIP_LIBRARY})
+  target_include_directories(lidar_recorder_node PRIVATE ${LASZIP_INCLUDE_DIR})
   target_compile_definitions(lidar_recorder_node PRIVATE HAVE_LASZIP)
+  message(STATUS "Found LASzip: ${LASZIP_LIBRARY}")
+else()
+  message(WARNING "LASzip not found - LAZ conversion will be disabled")
 endif()
 
 add_executable(bag_recorder_node src/bag_recorder_node.cpp)
@@ -86,6 +89,13 @@ ament_target_dependencies(pcd_to_laz_converter
 target_link_libraries(pcd_to_laz_converter ${PCL_LIBRARIES})
 target_include_directories(pcd_to_laz_converter PRIVATE ${PCL_INCLUDE_DIRS})
 target_compile_definitions(pcd_to_laz_converter PRIVATE ${PCL_COMPILE_DEFINITIONS})
+
+# Add LASzip support to pcd_to_laz_converter if found
+if(LASZIP_LIBRARY AND LASZIP_INCLUDE_DIR)
+  target_link_libraries(pcd_to_laz_converter ${LASZIP_LIBRARY})
+  target_include_directories(pcd_to_laz_converter PRIVATE ${LASZIP_INCLUDE_DIR})
+  target_compile_definitions(pcd_to_laz_converter PRIVATE HAVE_LASZIP)
+endif()
 
 # Install executables
 install(TARGETS

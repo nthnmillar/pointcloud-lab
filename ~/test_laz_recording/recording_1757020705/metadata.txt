@@ -1,0 +1,13 @@
+Recording session: 1757020705
+Topic: /lidar/points
+Total point clouds: 123
+Combined point cloud size: 1259520 points
+Raw data: enabled
+Raw PCD: enabled
+Raw PLY: enabled
+Raw LAZ: enabled
+Filtered point cloud size: 3441 points
+Filter level: 0.1
+Filtered PCD: enabled
+Filtered PLY: enabled
+Filtered LAZ: enabled

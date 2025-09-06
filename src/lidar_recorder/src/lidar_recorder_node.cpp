@@ -28,9 +28,9 @@ public:
         this->declare_parameter("filtered", true);
         this->declare_parameter("filter_lvl", 0.1);
         this->declare_parameter("save_individual_files", false);
-        this->declare_parameter("pcd", true);
-        this->declare_parameter("ply", true);
-        this->declare_parameter("laz", false);
+        this->declare_parameter("pcd", false);
+        this->declare_parameter("ply", false);
+        this->declare_parameter("laz", true);
         this->declare_parameter("las", false);
         this->declare_parameter("stop_recording", false);
         

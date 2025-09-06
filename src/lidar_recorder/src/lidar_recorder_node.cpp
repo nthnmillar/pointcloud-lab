@@ -207,12 +207,24 @@ private:
             header->x_offset = (min_x + max_x) / 2.0;
             header->y_offset = (min_y + max_y) / 2.0;
             header->z_offset = (min_z + max_z) / 2.0;
-            header->x_scale_factor = 0.001; // 1mm precision
-            header->y_scale_factor = 0.001;
-            header->z_scale_factor = 0.001;
+            
+            // Calculate appropriate scale factors to avoid overflow
+            double max_range = std::max({max_x - min_x, max_y - min_y, max_z - min_z});
+            double scale_factor = std::max(0.01, max_range / 1000000.0); // Ensure reasonable precision
+            
+            header->x_scale_factor = scale_factor;
+            header->y_scale_factor = scale_factor;
+            header->z_scale_factor = scale_factor;
             
             header->number_of_point_records = cloud->size();
             header->number_of_points_by_return[0] = cloud->size();
+            
+            // Set the header before opening
+            if (laszip_set_header(laszip_writer, header) != 0) {
+                RCLCPP_ERROR(this->get_logger(), "Failed to set LAZ header!");
+                laszip_destroy(laszip_writer);
+                return;
+            }
             
             // Open for writing with compression
             if (laszip_open_writer(laszip_writer, filename.c_str(), 1) != 0) {
@@ -223,24 +235,42 @@ private:
             
             // Write points
             size_t points_written = 0;
+            bool write_success = true;
+            RCLCPP_INFO(this->get_logger(), "Starting to write %zu points to LAZ file...", cloud->size());
+            
             for (const auto& pcl_point : cloud->points) {
                 point->X = static_cast<laszip_I32>((pcl_point.x - header->x_offset) / header->x_scale_factor);
                 point->Y = static_cast<laszip_I32>((pcl_point.y - header->y_offset) / header->y_scale_factor);
                 point->Z = static_cast<laszip_I32>((pcl_point.z - header->z_offset) / header->z_scale_factor);
                 
-                if (laszip_write_point(laszip_writer) != 0) {
-                    RCLCPP_ERROR(this->get_logger(), "Failed to write point %zu!", points_written);
+                int result = laszip_write_point(laszip_writer);
+                if (result != 0) {
+                    RCLCPP_ERROR(this->get_logger(), "Failed to write point %zu! LASzip error: %d", points_written, result);
+                    write_success = false;
                     break;
                 }
                 
                 points_written++;
+                
+                // Progress update for large datasets
+                if (points_written % 100000 == 0) {
+                    RCLCPP_INFO(this->get_logger(), "Written %zu/%zu points to LAZ...", points_written, cloud->size());
+                }
             }
             
             // Close and cleanup
-            laszip_close_writer(laszip_writer);
+            if (laszip_close_writer(laszip_writer) != 0) {
+                RCLCPP_ERROR(this->get_logger(), "Failed to close LAZ writer!");
+                write_success = false;
+            }
             laszip_destroy(laszip_writer);
             
-            RCLCPP_INFO(this->get_logger(), "Saved LAZ file: %s (%zu points)", filename.c_str(), points_written);
+            if (write_success && points_written == cloud->size()) {
+                RCLCPP_INFO(this->get_logger(), "Saved LAZ file: %s (%zu points)", filename.c_str(), points_written);
+            } else {
+                RCLCPP_ERROR(this->get_logger(), "LAZ file save incomplete: %s (%zu/%zu points written)", 
+                            filename.c_str(), points_written, cloud->size());
+            }
             
         } catch (const std::exception& e) {
             RCLCPP_ERROR(this->get_logger(), "Error saving LAZ file: %s", e.what());
@@ -282,18 +312,32 @@ private:
         // Save raw point cloud if requested
         std::string raw_filename;
         if (raw_) {
+            // Clean the raw data by removing invalid points
+            pcl::PointCloud<pcl::PointXYZ>::Ptr cleaned_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+            for (const auto& point : combined_cloud->points) {
+                if (std::isfinite(point.x) && std::isfinite(point.y) && std::isfinite(point.z)) {
+                    cleaned_cloud->points.push_back(point);
+                }
+            }
+            cleaned_cloud->width = cleaned_cloud->points.size();
+            cleaned_cloud->height = 1;
+            cleaned_cloud->is_dense = true;
+            
+            RCLCPP_INFO(this->get_logger(), "Cleaned raw data: %zu -> %zu points", 
+                       combined_cloud->size(), cleaned_cloud->size());
+            
             if (pcd_) {
                 raw_filename = save_dir + "/pointcloud_raw.pcd";
-                pcl::io::savePCDFile(raw_filename, *combined_cloud);
+                pcl::io::savePCDFile(raw_filename, *cleaned_cloud);
             }
             if (ply_) {
                 raw_filename = save_dir + "/pointcloud_raw.ply";
-                save_to_ply(raw_filename, combined_cloud);
+                save_to_ply(raw_filename, cleaned_cloud);
             }
             #ifdef HAVE_LASZIP
             if (laz_) {
                 raw_filename = save_dir + "/pointcloud_raw.laz";
-                save_to_laz(raw_filename, combined_cloud);
+                save_to_laz(raw_filename, cleaned_cloud);
             }
             #endif
         }

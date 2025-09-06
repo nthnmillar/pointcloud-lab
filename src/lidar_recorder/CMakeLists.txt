@@ -83,28 +83,12 @@ target_link_libraries(bag_filter_node ${PCL_LIBRARIES})
 target_include_directories(bag_filter_node PRIVATE ${PCL_INCLUDE_DIRS})
 target_compile_definitions(bag_filter_node PRIVATE ${PCL_COMPILE_DEFINITIONS})
 
-add_executable(pcd_to_laz_converter src/pcd_to_laz_converter.cpp)
-ament_target_dependencies(pcd_to_laz_converter
-  rclcpp
-  std_msgs
-)
-target_link_libraries(pcd_to_laz_converter ${PCL_LIBRARIES})
-target_include_directories(pcd_to_laz_converter PRIVATE ${PCL_INCLUDE_DIRS})
-target_compile_definitions(pcd_to_laz_converter PRIVATE ${PCL_COMPILE_DEFINITIONS})
-
-# Add LASzip support to pcd_to_laz_converter if found
-if(LASZIP_LIBRARY AND LASZIP_INCLUDE_DIR)
-  target_link_libraries(pcd_to_laz_converter ${LASZIP_LIBRARY})
-  target_include_directories(pcd_to_laz_converter PRIVATE ${LASZIP_INCLUDE_DIR})
-  target_compile_definitions(pcd_to_laz_converter PRIVATE HAVE_LASZIP)
-endif()
 
 # Install executables
 install(TARGETS
   lidar_recorder_node
   bag_recorder_node
   bag_filter_node
-  pcd_to_laz_converter
   DESTINATION lib/${PROJECT_NAME}
 )
 

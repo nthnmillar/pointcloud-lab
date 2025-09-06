@@ -7,6 +7,10 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/statistical_outlier_removal.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_sensor_msgs/tf2_sensor_msgs.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <chrono>
 #include <vector>
 #include <string>
@@ -46,6 +50,13 @@ public:
         las_ = this->get_parameter("las").as_bool();
         stop_recording_ = this->get_parameter("stop_recording").as_bool();
         
+        // Initialize TF2 buffer and listener
+        tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+        tf_listener_ = std::make_unique<tf2_ros::TransformListener>(*tf_buffer_);
+        
+        // Auto-detect the best target frame
+        target_frame_ = detect_best_target_frame();
+        
         // Create output directory
         std::filesystem::create_directories(output_dir_);
         
@@ -78,12 +89,58 @@ public:
     }
     
 private:
+    std::string detect_best_target_frame()
+    {
+        // Priority order: map -> odom -> base_link
+        std::vector<std::string> preferred_frames = {"map", "odom", "base_link"};
+        
+        for (const auto& frame : preferred_frames) {
+            try {
+                // Check if the frame exists by trying to get its transform
+                auto transform = tf_buffer_->lookupTransform(frame, frame, rclcpp::Time(0), 
+                                                           rclcpp::Duration::from_seconds(0.1));
+                RCLCPP_INFO(this->get_logger(), "Auto-detected target frame: %s", frame.c_str());
+                return frame;
+            } catch (const tf2::TransformException& ex) {
+                // Frame doesn't exist or not available, try next one
+                continue;
+            }
+        }
+        
+        // If no preferred frame is available, default to "map"
+        RCLCPP_WARN(this->get_logger(), "No preferred frames found, defaulting to 'map'");
+        return "map";
+    }
+    
     void lidar_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
     {
         try {
+            sensor_msgs::msg::PointCloud2 transformed_msg;
+            
+            // Transform point cloud to target frame if different from source frame
+            if (msg->header.frame_id != target_frame_) {
+                try {
+                    // Look up the transform
+                    auto transform = tf_buffer_->lookupTransform(
+                        target_frame_, msg->header.frame_id, msg->header.stamp, 
+                        rclcpp::Duration::from_seconds(0.1));
+                    
+                    // Transform the point cloud
+                    tf2::doTransform(*msg, transformed_msg, transform);
+                    transformed_msg.header.frame_id = target_frame_;
+                } catch (const tf2::TransformException& ex) {
+                    RCLCPP_WARN(this->get_logger(), "Could not transform point cloud from %s to %s: %s", 
+                               msg->header.frame_id.c_str(), target_frame_.c_str(), ex.what());
+                    // Use original message if transform fails
+                    transformed_msg = *msg;
+                }
+            } else {
+                transformed_msg = *msg;
+            }
+            
             // Convert ROS message to PCL point cloud
             pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-            pcl::fromROSMsg(*msg, *pcl_cloud);
+            pcl::fromROSMsg(transformed_msg, *pcl_cloud);
             
             if (!pcl_cloud->empty()) {
                 // Add timestamp for ordering
@@ -564,6 +621,7 @@ private:
     
     std::string output_dir_;
     std::string topic_name_;
+    std::string target_frame_;
     bool raw_;
     bool filtered_;
     double filter_lvl_;
@@ -573,6 +631,10 @@ private:
     bool laz_;
     bool las_;
     bool stop_recording_;
+    
+    // TF2 components
+    std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
+    std::unique_ptr<tf2_ros::TransformListener> tf_listener_;
     
     std::vector<std::pair<std::chrono::high_resolution_clock::time_point, 
                           pcl::PointCloud<pcl::PointXYZ>::Ptr>> point_clouds_;

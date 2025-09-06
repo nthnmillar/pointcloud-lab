@@ -142,4 +142,3 @@ def generate_launch_description():
         stop_recording_arg,
         lidar_recorder_node,
     ])
-

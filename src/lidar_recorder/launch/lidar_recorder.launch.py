@@ -66,6 +66,12 @@ def generate_launch_description():
         description='Save data in LAZ format (requires liblaszip)'
     )
     
+    las_arg = DeclareLaunchArgument(
+        'las',
+        default_value='false',
+        description='Save data in LAS format (requires liblaszip)'
+    )
+    
     stop_recording_arg = DeclareLaunchArgument(
         'stop_recording',
         default_value='false',
@@ -88,6 +94,7 @@ def generate_launch_description():
             'pcd': LaunchConfiguration('pcd'),
             'ply': LaunchConfiguration('ply'),
             'laz': LaunchConfiguration('laz'),
+            'las': LaunchConfiguration('las'),
             'stop_recording': LaunchConfiguration('stop_recording'),
         }],
         remappings=[
@@ -105,6 +112,7 @@ def generate_launch_description():
         pcd_arg,
         ply_arg,
         laz_arg,
+        las_arg,
         stop_recording_arg,
         lidar_recorder_node,
     ])

@@ -31,6 +31,7 @@ public:
         this->declare_parameter("pcd", true);
         this->declare_parameter("ply", true);
         this->declare_parameter("laz", false);
+        this->declare_parameter("las", false);
         this->declare_parameter("stop_recording", false);
         
         output_dir_ = this->get_parameter("output_dir").as_string();
@@ -42,6 +43,7 @@ public:
         pcd_ = this->get_parameter("pcd").as_bool();
         ply_ = this->get_parameter("ply").as_bool();
         laz_ = this->get_parameter("laz").as_bool();
+        las_ = this->get_parameter("las").as_bool();
         stop_recording_ = this->get_parameter("stop_recording").as_bool();
         
         // Create output directory
@@ -63,6 +65,7 @@ public:
         RCLCPP_INFO(this->get_logger(), "PCD format: %s", pcd_ ? "enabled" : "disabled");
         RCLCPP_INFO(this->get_logger(), "PLY format: %s", ply_ ? "enabled" : "disabled");
         RCLCPP_INFO(this->get_logger(), "LAZ format: %s", laz_ ? "enabled" : "disabled");
+        RCLCPP_INFO(this->get_logger(), "LAS format: %s", las_ ? "enabled" : "disabled");
         RCLCPP_INFO(this->get_logger(), "Save individual files: %s", save_individual_files_ ? "enabled" : "disabled");
         RCLCPP_INFO(this->get_logger(), "Press Ctrl+C to stop recording and save data");
     }
@@ -278,6 +281,141 @@ private:
     }
     #endif
     
+    #ifdef HAVE_LASZIP
+    void save_to_las(const std::string& filename, const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+    {
+        if (cloud->empty()) {
+            RCLCPP_ERROR(this->get_logger(), "Empty point cloud for LAS saving!");
+            return;
+        }
+        
+        try {
+            // Initialize LASzip
+            laszip_POINTER laszip_writer;
+            if (laszip_create(&laszip_writer) != 0) {
+                RCLCPP_ERROR(this->get_logger(), "Failed to create LASzip writer!");
+                return;
+            }
+            
+            // Get header and point pointers
+            laszip_header_struct* header;
+            laszip_point_struct* point;
+            if (laszip_get_header_pointer(laszip_writer, &header) != 0) {
+                RCLCPP_ERROR(this->get_logger(), "Failed to get LASzip header pointer!");
+                laszip_destroy(laszip_writer);
+                return;
+            }
+            
+            if (laszip_get_point_pointer(laszip_writer, &point) != 0) {
+                RCLCPP_ERROR(this->get_logger(), "Failed to get LASzip point pointer!");
+                laszip_destroy(laszip_writer);
+                return;
+            }
+            
+            // Set header information
+            header->version_major = 1;
+            header->version_minor = 2;
+            header->point_data_format = 0; // XYZ format
+            header->point_data_record_length = 20;
+            
+            // Calculate bounds
+            double min_x = std::numeric_limits<double>::max();
+            double min_y = std::numeric_limits<double>::max();
+            double min_z = std::numeric_limits<double>::max();
+            double max_x = std::numeric_limits<double>::lowest();
+            double max_y = std::numeric_limits<double>::lowest();
+            double max_z = std::numeric_limits<double>::lowest();
+            
+            for (const auto& pcl_point : cloud->points) {
+                min_x = std::min(min_x, static_cast<double>(pcl_point.x));
+                min_y = std::min(min_y, static_cast<double>(pcl_point.y));
+                min_z = std::min(min_z, static_cast<double>(pcl_point.z));
+                max_x = std::max(max_x, static_cast<double>(pcl_point.x));
+                max_y = std::max(max_y, static_cast<double>(pcl_point.y));
+                max_z = std::max(max_z, static_cast<double>(pcl_point.z));
+            }
+            
+            header->min_x = min_x;
+            header->min_y = min_y;
+            header->min_z = min_z;
+            header->max_x = max_x;
+            header->max_y = max_y;
+            header->max_z = max_z;
+            
+            header->x_offset = (min_x + max_x) / 2.0;
+            header->y_offset = (min_y + max_y) / 2.0;
+            header->z_offset = (min_z + max_z) / 2.0;
+            
+            // Calculate appropriate scale factors to avoid overflow
+            double max_range = std::max({max_x - min_x, max_y - min_y, max_z - min_z});
+            double scale_factor = std::max(0.01, max_range / 1000000.0); // Ensure reasonable precision
+            
+            header->x_scale_factor = scale_factor;
+            header->y_scale_factor = scale_factor;
+            header->z_scale_factor = scale_factor;
+            
+            header->number_of_point_records = cloud->size();
+            header->number_of_points_by_return[0] = cloud->size();
+            
+            // Set the header before opening
+            if (laszip_set_header(laszip_writer, header) != 0) {
+                RCLCPP_ERROR(this->get_logger(), "Failed to set LAS header!");
+                laszip_destroy(laszip_writer);
+                return;
+            }
+            
+            // Open for writing WITHOUT compression (LAS format)
+            if (laszip_open_writer(laszip_writer, filename.c_str(), 0) != 0) {
+                RCLCPP_ERROR(this->get_logger(), "Failed to open LAS file for writing: %s", filename.c_str());
+                laszip_destroy(laszip_writer);
+                return;
+            }
+            
+            // Write points
+            size_t points_written = 0;
+            bool write_success = true;
+            RCLCPP_INFO(this->get_logger(), "Starting to write %zu points to LAS file...", cloud->size());
+            
+            for (const auto& pcl_point : cloud->points) {
+                point->X = static_cast<laszip_I32>((pcl_point.x - header->x_offset) / header->x_scale_factor);
+                point->Y = static_cast<laszip_I32>((pcl_point.y - header->y_offset) / header->y_scale_factor);
+                point->Z = static_cast<laszip_I32>((pcl_point.z - header->z_offset) / header->z_scale_factor);
+                
+                int result = laszip_write_point(laszip_writer);
+                if (result != 0) {
+                    RCLCPP_ERROR(this->get_logger(), "Failed to write point %zu! LASzip error: %d", points_written, result);
+                    write_success = false;
+                    break;
+                }
+                
+                points_written++;
+                
+                // Progress update for large datasets
+                if (points_written % 100000 == 0) {
+                    RCLCPP_INFO(this->get_logger(), "Written %zu/%zu points to LAS...", points_written, cloud->size());
+                }
+            }
+            
+            // Close and cleanup
+            if (laszip_close_writer(laszip_writer) != 0) {
+                RCLCPP_ERROR(this->get_logger(), "Failed to close LAS writer!");
+                write_success = false;
+            }
+            laszip_destroy(laszip_writer);
+            
+            if (write_success && points_written == cloud->size()) {
+                RCLCPP_INFO(this->get_logger(), "Saved LAS file: %s (%zu points)", filename.c_str(), points_written);
+            } else {
+                RCLCPP_ERROR(this->get_logger(), "LAS file save incomplete: %s (%zu/%zu points written)", 
+                            filename.c_str(), points_written, cloud->size());
+            }
+            
+        } catch (const std::exception& e) {
+            RCLCPP_ERROR(this->get_logger(), "Error saving LAS file: %s", e.what());
+        }
+    }
+    #endif
+    
     void save_recorded_data()
     {
         if (point_clouds_.empty()) {
@@ -339,6 +477,10 @@ private:
                 raw_filename = save_dir + "/pointcloud_raw.laz";
                 save_to_laz(raw_filename, cleaned_cloud);
             }
+            if (las_) {
+                raw_filename = save_dir + "/pointcloud_raw.las";
+                save_to_las(raw_filename, cleaned_cloud);
+            }
             #endif
         }
         
@@ -367,6 +509,10 @@ private:
                 filtered_filename = save_dir + "/pointcloud_filtered.laz";
                 save_to_laz(filtered_filename, filtered_cloud);
             }
+            if (las_) {
+                filtered_filename = save_dir + "/pointcloud_filtered.las";
+                save_to_las(filtered_filename, filtered_cloud);
+            }
             #endif
         } else {
             RCLCPP_INFO(this->get_logger(), "No filtering applied, raw data only");
@@ -386,6 +532,7 @@ private:
                 if (ply_) metadata << "Raw PLY: enabled\n";
                 #ifdef HAVE_LASZIP
                 if (laz_) metadata << "Raw LAZ: enabled\n";
+                if (las_) metadata << "Raw LAS: enabled\n";
                 #endif
             } else {
                 metadata << "Raw data: disabled\n";
@@ -397,6 +544,7 @@ private:
                 if (ply_) metadata << "Filtered PLY: enabled\n";
                 #ifdef HAVE_LASZIP
                 if (laz_) metadata << "Filtered LAZ: enabled\n";
+                if (las_) metadata << "Filtered LAS: enabled\n";
                 #endif
             } else {
                 metadata << "Filtering: disabled\n";
@@ -423,6 +571,7 @@ private:
     bool pcd_;
     bool ply_;
     bool laz_;
+    bool las_;
     bool stop_recording_;
     
     std::vector<std::pair<std::chrono::high_resolution_clock::time_point, 

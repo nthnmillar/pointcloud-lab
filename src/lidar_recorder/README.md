@@ -4,7 +4,7 @@ Records LiDAR point clouds to PCD, PLY, LAS, and LAZ formats with optional filte
 
 ## Setup
 
-First, start the robot simulation as described in the [main README](../README.md):
+First, start the robot simulation as described in the [setup instructions](https://github.com/nthnmillar/pointcloud-lab#quick-start):
 
 ```bash
 ros2 launch yahboom_rosmaster_bringup yahboom_slam.launch.py gz_headless:=true

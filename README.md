@@ -90,6 +90,10 @@ source install/setup.bash
 ros2 run yahboom_rosmaster_system_tests smooth_keyboard_controller
 ```
 
+## LiDAR Recording
+
+For recording and processing LiDAR point clouds, see the [LiDAR Recorder](src/lidar_recorder/README.md) package.
+
 ## Credits
 
 This project incorporates elements from the [yahboom_rosmaster](https://github.com/automaticaddison/yahboom_rosmaster) project by [Automatic Addison](https://automaticaddison.com/), which is licensed under the BSD 3-Clause License. 

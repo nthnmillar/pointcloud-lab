@@ -37,6 +37,8 @@ recorded_lidar_data/
 raw_data/
 filtered_data/
 lidar_recording*/
+test_laz_recording/
+~/test_laz_recording/
 *.pcd
 *.ply
 *.laz
